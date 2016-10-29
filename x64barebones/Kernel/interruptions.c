@@ -1,5 +1,6 @@
 //interruptions.c
 #include <interruptions.h>
+#include <keyboard_driver.h>
 
 #pragma pack(push)
 #pragma pack(1)
@@ -35,21 +36,20 @@ void iSetHandler(int index, uint64_t handler) {
 }
 
 
-static int i = 0;
-char *video = (char *) 0xB8000;
 
 void tickHandler() {
-	video[i++] = i;	
 }
 
 void sti();
 void irq0Handler();
+void irq1Handler();
+
 void setPicMaster(uint16_t);
 
 typedef void (*handler_t)(void);
 
 handler_t handlers[] = {tickHandler, //IRQ0 - timer tick
-						
+						keyboardHandler
 						};
 
 void irqDispatcher(int irq) {
@@ -57,12 +57,13 @@ void irqDispatcher(int irq) {
 }
 
 
-
+	
 void initInterruptions()
 {	
 	iSetHandler(0x20, (uint64_t) irq0Handler);
+	iSetHandler(0x20, (uint64_t) irq1Handler);
 	
-	setPicMaster(0xFE);
+	setPicMaster(0xFC);
 	
 	sti();
 }
