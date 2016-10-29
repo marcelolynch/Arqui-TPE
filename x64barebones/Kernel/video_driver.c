@@ -20,7 +20,6 @@ void newline(){
 }
 
 void screen_write(char* s, uint64_t size){
-
 		while(size-- != 0){
 		char next = *(s++);
 		if(next == '\b'){

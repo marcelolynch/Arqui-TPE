@@ -18,10 +18,15 @@ syscallHandler:
 	mov rcx, rbx ; Cuarto parametro lo que estaba en rdx (3° param syscall)
 
 	call syscallDispatcher
+
+	mov [aux], rax ;valor de retorno
 	
-	mov al, 20h ; EOI
-	out 20h, al
-	
-	popaq
+	popaq 
+
+	mov rax, [aux]
 
 	iretq
+
+
+section .bss
+	aux resq 1;

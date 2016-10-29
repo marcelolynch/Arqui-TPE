@@ -3,7 +3,7 @@
 #define BUF_SIZE 256 
 int keyRead();
 
-static int buffer[BUF_SIZE]; 
+static int buffer[BUF_SIZE] = {0}; 
 
 static int* pointer = buffer;
 static int* current = buffer;
@@ -90,7 +90,6 @@ unsigned char shiftedKB[128] =
 };    
 
 
-static char * video =  (char *)0xB8000;
 static int i = 0;
 static int shift = 0;
 
@@ -110,13 +109,17 @@ void keyboardHandler(){
   int pressed = shift ? shiftedKB[key] : keyboard[key];
   
   if(!keyReleased && pressed != 0){
-	 *(current++) = key;
-   screen_write(&pressed, 1);
+	 *(current++) = pressed;
  }
 
 }
 
 
-getKey(){
-  
+int getKey(){
+  int next;
+  if(next = *pointer){
+    *pointer = 0;
+     pointer++;
+  }
+  return next;
 }

@@ -11,7 +11,6 @@ syscall_ptr sysCalls[] = {
 	0, 0, 0,
 	_read, //Syscall 3
 	_write, //Syscall 4
-	//
 };
 
 
@@ -29,5 +28,8 @@ uint64_t _write(uint64_t fd, uint64_t str, uint64_t size){
 }
 
 uint64_t _read(uint64_t fd, uint64_t buf, uint64_t count){
-	return 0;
+	while(count-- > 0){
+		*(int*)buf = getKey();
+		buf++;
+	}
 }

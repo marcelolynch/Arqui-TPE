@@ -53,15 +53,15 @@ void * initializeKernelBinary()
 	};
 
 	loadModules(&endOfKernelBinary, moduleAddresses);
-	ncPrint("[Done]");
+/*	ncPrint("[Done]");
 	ncNewline();
 	ncNewline();
 
 	ncPrint("[Initializing kernel's binary]");
 	ncNewline();
-
+*/
 	clearBSS(&bss, &endOfKernel - &bss);
-
+/*
 	ncPrint("  text: 0x");
 	ncPrintHex((uint64_t)&text);
 	ncNewline();
@@ -78,9 +78,8 @@ void * initializeKernelBinary()
 	ncPrint("[Done]");
 	ncNewline();
 	ncNewline();
-
+*/
 	initInterruptions();
-	while(1);
 	((EntryPoint)sampleCodeModuleAddress)();
 
 	return getStackBase();
