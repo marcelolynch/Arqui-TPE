@@ -6,7 +6,7 @@ static char * currentpos = (char *)0xB8000;
 #define VROWS 25
 #define LINE_BYTES 160
 #define COL_BYTES 50
-#define DEF_FORMAT 0x0f
+#define DEF_FORMAT 0x5f
 #include "video_driver.h"
 
 
@@ -49,7 +49,7 @@ void clear_screen(){
 	int c = 0;
 	while(c < LINE_BYTES * COL_BYTES){
 		*(currentpos++) = ' ';
-		*(currentpos++) = 0x0f;
+		*(currentpos++) = DEF_FORMAT;
 		c++;
 	}
 	currentpos = video;

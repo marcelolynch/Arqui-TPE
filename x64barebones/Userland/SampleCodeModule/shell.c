@@ -17,9 +17,9 @@ int main() {
 
 
 void shell(){
-	void getCommand();
-	void processCommand();
-	puts("Welcome to Userland\n");
+	sys_clrscrn();
+
+	puts("Bienvenidos a la shell que hace echo y clear\n");
 
 	while(1){
 		putchar('>');
@@ -59,5 +59,7 @@ void processCommand(){
 	}
 	else if(strcmp("clear", cmd_buffer) == 0){
 		sys_clrscrn();
+	} else{
+		puts("\nNo such command\n");
 	}
 }
