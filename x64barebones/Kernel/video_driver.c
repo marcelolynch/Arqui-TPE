@@ -22,8 +22,17 @@ void newline(){
 void screen_write(char* s, uint64_t size){
 
 		while(size-- != 0){
-		*(currentpos++) = *(s++);
+		char next = *(s++);
+		if(next == '\b'){
+			currentpos -= 2;
+			*currentpos = ' ';
+		}else if (next == '\n'){
+			newline();
+		}
+		else{
+		*(currentpos++) = next;
 		*(currentpos++) = DEF_FORMAT;
+		}
 	} 
 }
 

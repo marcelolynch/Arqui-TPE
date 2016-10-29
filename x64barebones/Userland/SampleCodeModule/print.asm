@@ -1,7 +1,7 @@
 GLOBAL puts
 section .text
 
-puts:
+sys_read:
 	mov rbx, 1 ;STDOUT
 	mov rcx, rdi ;string
 	mov rdx, rsi ;size

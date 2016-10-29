@@ -1,7 +1,9 @@
+#include "video_driver.h"
+
 #define BUF_SIZE 256 
 int keyRead();
 
-static int buffer[BUF_SIZE]; //Buffer circular para guadar las teclas
+static int buffer[BUF_SIZE]; 
 
 static int* pointer = buffer;
 static int* current = buffer;
@@ -109,8 +111,12 @@ void keyboardHandler(){
   
   if(!keyReleased && pressed != 0){
 	 *(current++) = key;
-    video[i++] = pressed;
-    video[i++] = 0x0f;
-  }
+   screen_write(&pressed, 1);
+ }
 
+}
+
+
+getKey(){
+  
 }
