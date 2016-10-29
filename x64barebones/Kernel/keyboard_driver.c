@@ -51,16 +51,16 @@ unsigned char keyboard[128] =
 
 unsigned char shiftedKB[128] =
 {
-    0,  27, '1', '2', '3', '4', '5', '6', '7', '8', /* 9 */
-  '9', '0', '-', '=', '\b', /* Backspace */
+    0,  27, '!', '@', '#', '$', '%', '^', '&', '*', /* 9 */
+  '(', ')', '_', '+', '\b', /* Backspace */
   '\t',     /* Tab */
   'Q', 'W', 'E', 'R', /* 19 */
-  'T', 'U', 'U', 'I', 'O', 'P', '[', ']', '\n', /* Enter key */
+  'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n', /* Enter key */
     0,      /* 29   - Control */
-  'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', /* 39 */
- '\'', '`',   0,    /* Left shift */
- '\\', 'Z', 'X', 'C', 'V', 'B', 'N',      /* 49 */
-  'M', ',', '.', '/',   0,        /* Right shift */
+  'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', /* 39 */
+ '"', '|',   0,    /* Left shift */
+ '>', 'Z', 'X', 'C', 'V', 'B', 'N',      /* 49 */
+  'M', '<', '>', '?',   0,        /* Right shift */
   '*',
     0,  /* Alt */
   ' ',  /* Space bar */
@@ -87,7 +87,8 @@ unsigned char shiftedKB[128] =
     0,  /* F11 Key */
     0,  /* F12 Key */
     0,  /* All other keys are undefined */
-};    
+};
+
 
 
 static int i = 0;
