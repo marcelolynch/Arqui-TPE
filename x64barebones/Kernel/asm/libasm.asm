@@ -17,6 +17,7 @@ irq1Handler:
 	irqHandler 1
 
 
+
 sti:
 	sti
 	ret

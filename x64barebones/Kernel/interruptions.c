@@ -43,6 +43,7 @@ void tickHandler() {
 void sti();
 void irq0Handler();
 void irq1Handler();
+void syscallHandler();
 
 void setPicMaster(uint16_t);
 
@@ -61,8 +62,9 @@ void irqDispatcher(int irq) {
 void initInterruptions()
 {	
 	iSetHandler(0x20, (uint64_t) irq0Handler);
-	iSetHandler(0x20, (uint64_t) irq1Handler);
-	
+	iSetHandler(0x21, (uint64_t) irq1Handler);
+	iSetHandler(0x80,(uint64_t)syscallHandler);
+	//iSetHandler(0x)
 	setPicMaster(0xFC);
 	
 	sti();

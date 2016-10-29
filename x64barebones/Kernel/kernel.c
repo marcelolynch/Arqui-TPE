@@ -80,10 +80,11 @@ void * initializeKernelBinary()
 	ncNewline();
 
 	initInterruptions();
-	while(1);
+	((EntryPoint)sampleCodeModuleAddress)();
+
 	return getStackBase();
 }
 
 int main(){
-	return 0;
+	
 }
