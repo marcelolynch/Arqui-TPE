@@ -3,8 +3,10 @@
 #include "syscalls.h"
 #define BUF_SIZE 512
 
-void shell();
 
+void shell();
+void getCommand();
+void processCommand();
 
 static char cmd_buffer[BUF_SIZE];
 
@@ -52,7 +54,7 @@ void getCommand(){
 
 
 void processCommand(){
-	if(starts_with(cmd_buffer, "echo")){
+	if(starts_with(cmd_buffer, "echo ")){
 		putchar('\n');
 		puts(cmd_buffer + 5);
 		putchar('\n');

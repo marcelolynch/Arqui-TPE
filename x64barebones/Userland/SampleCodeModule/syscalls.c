@@ -17,5 +17,5 @@ uint64_t sys_write(int fd, char * str, int size){
 }
 
 uint64_t sys_clrscrn(){
-	_syscall(SYS_CLRSCRN, 0,0,0);
+	return _syscall(SYS_CLRSCRN, 0,0,0);
 }

@@ -40,9 +40,17 @@ void iSetHandler(int index, uint64_t handler) {
 void tickHandler() {
 }
 
+static char * video =  (char *)0xB8000;
+static int i = 0;
+void rtcHandler(){
+	video[i++] = i;
+
+}
 void sti();
 void irq0Handler();
 void irq1Handler();
+void irq8Handler();
+
 void syscallHandler();
 
 void setPicMaster(uint16_t);
@@ -50,7 +58,9 @@ void setPicMaster(uint16_t);
 typedef void (*handler_t)(void);
 
 handler_t handlers[] = {tickHandler, //IRQ0 - timer tick
-						keyboardHandler
+						keyboardHandler,
+						0, 0, 0, 0, 0, 0, // 2-7 sin usar
+						rtcHandler
 						};
 
 void irqDispatcher(int irq) {
@@ -63,9 +73,11 @@ void initInterruptions()
 {	
 	iSetHandler(0x20, (uint64_t) irq0Handler);
 	iSetHandler(0x21, (uint64_t) irq1Handler);
+	iSetHandler(0x28, (uint64_t) irq8Handler);
+	
 	iSetHandler(0x80,(uint64_t)syscallHandler);
 	//iSetHandler(0x)
-	setPicMaster(0xFC);
+	setPicMaster(0x7C); //0111 1100
 	
 	sti();
 }

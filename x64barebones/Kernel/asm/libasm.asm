@@ -3,6 +3,7 @@ GLOBAL sti
 GLOBAL setPicMaster
 GLOBAL irq0Handler
 GLOBAL irq1Handler
+GLOBAL irq8Handler
 
 EXTERN irqDispatcher
 
@@ -15,6 +16,9 @@ irq0Handler:
 	
 irq1Handler:
 	irqHandler 1
+
+irq8Handler:
+	irqHandler 8
 
 
 
