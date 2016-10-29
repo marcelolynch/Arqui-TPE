@@ -43,8 +43,8 @@ void print_positioned(char * s, char f, char c){
 	print(s);
 	currentpos = cp;
 }
-
-void clear(){
+*/
+void clear_screen(){
 	currentpos = video;
 	int c = 0;
 	while(c < LINE_BYTES * COL_BYTES){
@@ -55,6 +55,8 @@ void clear(){
 	currentpos = video;
 
 }
+
+/*
 void print(char * s){
 	print_formatted(s, DEF_FORMAT);
 }

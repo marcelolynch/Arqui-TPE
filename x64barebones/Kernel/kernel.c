@@ -36,7 +36,7 @@ void * getStackBase()
 
 void * initializeKernelBinary()
 {
-	char buffer[10];
+	/*char buffer[10];
 
 	ncPrint("[x64BareBones]");
 	ncNewline();
@@ -46,13 +46,15 @@ void * initializeKernelBinary()
 	ncNewline();
 
 	ncPrint("[Loading modules]");
-	ncNewline();
+	ncNewline();*/
+
 	void * moduleAddresses[] = {
 		sampleCodeModuleAddress,
 		sampleDataModuleAddress
 	};
 
 	loadModules(&endOfKernelBinary, moduleAddresses);
+	
 /*	ncPrint("[Done]");
 	ncNewline();
 	ncNewline();

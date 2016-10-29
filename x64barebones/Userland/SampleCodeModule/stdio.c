@@ -1,7 +1,6 @@
 #define STDOUT 1
-void sys_read(int fd, int * buf, int size);
-void sys_write(int fd, char * str, int size);
-int strlen(char*s);
+#include "syscalls.h"
+#include "string.h"
 
 int getchar(){
 	int c = 0;

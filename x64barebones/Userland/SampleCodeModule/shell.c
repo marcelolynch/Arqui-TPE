@@ -1,13 +1,20 @@
+#include "stdio.h"
+#include "string.h"
+#include "syscalls.h"
 #define BUF_SIZE 512
 
-int strlen(char * s);
-int getchar();
-void putchar(char c);
-void puts(char * s);
-int strcmp(char * s1, char * s2);
-int starts_with(char * s, char * start);
+void shell();
+
 
 static char cmd_buffer[BUF_SIZE];
+
+
+
+int main() {
+	shell();
+	return 0;
+}
+
 
 void shell(){
 	void getCommand();
@@ -18,7 +25,6 @@ void shell(){
 		putchar('>');
 		getCommand();
 		processCommand();
-		putchar('\n');
 	}
 }
 
@@ -27,10 +33,20 @@ void getCommand(){
 	int c;
 	int i = 0;
 	while((c = getchar()) != '\n'){
-		putchar(c);
-		cmd_buffer[i++] = c;
+		if(c == '\b'){
+
+			if(i > 0){ //Borro del buffer de comando
+			i--;
+			putchar(c); //Y de la pantalla
+			}
+
+		} else {
+			cmd_buffer[i++] = c; //Agrego al buffer
+			putchar(c);
+
+		}
 	}
-	cmd_buffer[i] = 0;
+	cmd_buffer[i] = 0; //Null termination
 	return;
 }
 
@@ -42,6 +58,6 @@ void processCommand(){
 		putchar('\n');
 	}
 	else if(strcmp("clear", cmd_buffer) == 0){
-		puts("clear\n");
+		sys_clrscrn();
 	}
 }
