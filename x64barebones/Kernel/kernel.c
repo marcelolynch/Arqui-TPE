@@ -88,5 +88,5 @@ void * initializeKernelBinary()
 }
 
 int main(){
-	
+	return 0;	
 }

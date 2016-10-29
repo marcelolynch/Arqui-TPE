@@ -1,6 +1,6 @@
 #include "video_driver.h"
 
-#define BUF_SIZE 256 
+#define BUF_SIZE 64
 int keyRead();
 
 static int buffer[BUF_SIZE] = {0}; 
@@ -106,12 +106,22 @@ void keyboardHandler(){
   }
 
   int keyReleased = key & 0x80;
-  int pressed = shift ? shiftedKB[key] : keyboard[key];
   
-  if(!keyReleased && pressed != 0){
-	 *(current++) = pressed;
- }
+  if(!keyReleased && keyboard[key]){ //keyboard[key] es 0 cuando no es un char imprimible
+      int pressed = shift ? shiftedKB[key] : keyboard[key];
 
+    if(*current == 0){
+      *(current++) = pressed;
+     
+      if(current-buffer == BUF_SIZE){ //Fin del buffer
+        current = buffer; //Vuelve al principio
+      }
+    
+    }
+    else{ 
+    // No hay espacio en el buffer
+    }
+  }
 }
 
 
@@ -120,6 +130,9 @@ int getKey(){
   if(next = *pointer){
     *pointer = 0;
      pointer++;
+     if(pointer - buffer == BUF_SIZE){
+      pointer = buffer; //Vuelve a principio
+     }
   }
   return next;
 }
