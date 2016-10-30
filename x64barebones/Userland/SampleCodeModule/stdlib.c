@@ -3,7 +3,8 @@
 #include "ctype.h"
 
 void * malloc(uint64_t bytes){
-	return (void*)sys_memalloc(bytes);
+	void * ret = (void*)sys_memalloc(bytes);
+	return ret;
 }
 
 void free(void * ptr){

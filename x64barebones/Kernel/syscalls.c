@@ -43,9 +43,9 @@ uint64_t _clrscrn(uint64_t dummy, uint64_t dummy2, uint64_t dummy3){
 }
 
 
-static void * mem_pointer = (void*)0x600000; //Doy memoria a partir del 6to mega
+static void * mem_pointer = (void*)0x1000000; //Doy memoria a partir del 10mo mega porque pinta
 uint64_t _memalloc(uint64_t size, uint64_t dummy2, uint64_t dummy3){
 	void * ptr = mem_pointer;
-	mem_pointer += size*4; //Reservo 4 veces más para simular realloc despues
+	mem_pointer += size; 
 	return (uint64_t)ptr;
 }

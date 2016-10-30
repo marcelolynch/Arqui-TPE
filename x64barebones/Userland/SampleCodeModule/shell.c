@@ -68,7 +68,7 @@ void processCommand(){
 	}
 	else if(strcmp("clear", cmd_buffer) == 0){
 		sys_clrscrn();
-	} else if(strcmp("fanorona", cmd_buffer) == 0){
+	} else if(strcmp("f", cmd_buffer) == 0){
 		fanorona();
 	}
 	else if(strcmp("exit", cmd_buffer)== 0){
