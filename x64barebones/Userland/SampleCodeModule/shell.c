@@ -23,6 +23,8 @@ int main() {
 static int run;
 void shell(){
 
+	int a= 100, b;
+
 	sys_clrscrn();
 	puts(SHELLMSG);
 
@@ -64,8 +66,10 @@ void processCommand(){
 	}
 	else if(strcmp("clear", cmd_buffer) == 0){
 		sys_clrscrn();
-	} else if(strcmp("exit", cmd_buffer)== 0){
-
+	} else if(strcmp("fanorona", cmd_buffer) == 0){
+		fanorona();
+	}
+	else if(strcmp("exit", cmd_buffer)== 0){
 		run = 0;
 	}
 	else{

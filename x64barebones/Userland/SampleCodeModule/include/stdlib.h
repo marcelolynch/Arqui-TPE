@@ -13,4 +13,6 @@ void free(void * ptr);
 
 void * realloc(void * ptr, uint64_t size);
 
+int atoi(char *str);
+
 #endif

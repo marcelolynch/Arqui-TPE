@@ -11,5 +11,7 @@ void puts(char * s);
 void printf(char* fmt, ...);
 void sprintf(char * buf, char *fmt, ...);
 void vprintf(char *fmt, va_list arg);
+int scanf(char* fmt, ...);
+
 
 #endif
