@@ -32,3 +32,20 @@ int starts_with(char * str, char * start){
 	}
 	return *start == 0;
 }
+
+
+char * strcpy ( char * destination, char * source){
+	return strncpy(destination, source, strlen(source) + 1);
+}
+
+
+char * strncpy ( char * destination, char * source, int size){
+	int i = 0;
+	char * ret = destination;
+	while(*source && i < size){
+		*(destination++) = *(source++);
+		i++;
+	}
+	*destination = '\0';
+	return ret;
+}

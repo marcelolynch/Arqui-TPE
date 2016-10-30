@@ -3,6 +3,7 @@
 #define SYS_READ 3
 #define SYS_WRITE 4
 #define SYS_CLRSCRN 5
+#define SYS_MEMALLOC 6
 
 uint64_t _syscall(uint64_t code, uint64_t param1, uint64_t param2, uint64_t param3);
 
@@ -19,4 +20,8 @@ uint64_t sys_write(int fd, char * str, int size){
 //System call para borrar la pantalla
 uint64_t sys_clrscrn(){
 	return _syscall(SYS_CLRSCRN, 0,0,0);
+}
+
+uint64_t sys_memalloc(uint64_t bytes){
+	return _syscall(SYS_MEMALLOC, bytes, 0, 0);
 }

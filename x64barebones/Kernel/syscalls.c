@@ -7,12 +7,14 @@ typedef uint64_t (* syscall_ptr)(uint64_t p, uint64_t q, uint64_t r);
 uint64_t _write(uint64_t fd, uint64_t str, uint64_t size);
 uint64_t _read(uint64_t fd, uint64_t str, uint64_t size);
 uint64_t _clrscrn(uint64_t dummy, uint64_t dummy2, uint64_t dummy3);
+uint64_t _memalloc(uint64_t size, uint64_t dummy2, uint64_t dummy3);
 
 syscall_ptr sysCalls[] = {
 	0, 0, 0,
 	_read, //Syscall 3
 	_write, //Syscall 4
-	_clrscrn //Syscall 5
+	_clrscrn, //Syscall 5
+	_memalloc //syscall 6
 };
 
 
@@ -38,4 +40,12 @@ uint64_t _read(uint64_t fd, uint64_t buf, uint64_t count){
 
 uint64_t _clrscrn(uint64_t dummy, uint64_t dummy2, uint64_t dummy3){
 	clear_screen();
+}
+
+
+static void * mem_pointer = (void*)0x600000; //Doy memoria a partir del 6to mega
+uint64_t _memalloc(uint64_t size, uint64_t dummy2, uint64_t dummy3){
+	void * ptr = mem_pointer;
+	mem_pointer += size*4; //Reservo 4 veces más para simular realloc despues
+	return (uint64_t)ptr;
 }

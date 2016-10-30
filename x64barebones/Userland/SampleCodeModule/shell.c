@@ -1,4 +1,5 @@
 #include "stdio.h"
+#include "stdlib.h"
 #include "string.h"
 #include "syscalls.h"
 #define MAX_SIZE 512
@@ -21,10 +22,10 @@ int main() {
 
 static int run;
 void shell(){
-	sys_clrscrn();
 
+	sys_clrscrn();
 	puts(SHELLMSG);
-	puts("\n Welcome to Userland \n\n");
+	
 	run = 1;
 	while(run){
 		putchar('>');

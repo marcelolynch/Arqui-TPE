@@ -5,5 +5,6 @@
 uint64_t sys_read(int fd, int * buf, int size);
 uint64_t sys_write(int fd, char * str, int size);
 uint64_t sys_clrscrn();
+uint64_t sys_memalloc(uint64_t bytes);
 
 #endif
