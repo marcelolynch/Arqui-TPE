@@ -3,6 +3,8 @@
 #include "syscalls.h"
 #define MAX_SIZE 512
 
+#define SHELLMSG  " ___| |__   ___| | |  ___\n/ __| '_ \\ / _ \\ | | / __|\n\\__ \\ | | |  __/ | || (__ \n|___/_| |_|\\___|_|_(_)___|\n"
+
 
 void shell();
 void getCommand();
@@ -21,7 +23,8 @@ static int run;
 void shell(){
 	sys_clrscrn();
 
-	puts("Bienvenidos a la shell que hace echo y clear\n");
+	puts(SHELLMSG);
+	puts("\n Welcome to Userland \n\n");
 	run = 1;
 	while(run){
 		putchar('>');
@@ -30,7 +33,6 @@ void shell(){
 	}
 	return;
 }
-
 
 void getCommand(){
 	int c;
@@ -62,7 +64,7 @@ void processCommand(){
 	else if(strcmp("clear", cmd_buffer) == 0){
 		sys_clrscrn();
 	} else if(strcmp("exit", cmd_buffer)== 0){
-		
+
 		run = 0;
 	}
 	else{
