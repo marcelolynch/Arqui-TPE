@@ -33,9 +33,6 @@ void puts(char * s){
 }
 
 
-
-
-
 void getline(char * buf, int max){
     int c;
     int i = 0;
@@ -51,6 +48,7 @@ void getline(char * buf, int max){
             putchar(c);
         }
     }
+        putchar('\n');
 
     buf[i] = 0; //Null termination
     return;
@@ -59,7 +57,6 @@ void getline(char * buf, int max){
 
 void printf(char* fmt, ...) 
 { 
-
 	va_list arg; 
     va_start(arg, fmt); 
 
@@ -67,7 +64,8 @@ void printf(char* fmt, ...)
 
     //Cerrando la lista variable
     va_end(arg); 
-} 
+
+}
 
 
 void vprintf(char *fmt, va_list arg){
@@ -243,8 +241,6 @@ int scanf(char* fmt, ...)
                         int_ptr = va_arg(arg,int *); //Leo puntero
 
                         if(*buf != '-' && !isdigit(*buf)){
-                            printf("%c", *buf);
-                            printf(" char \n");
                             va_end(arg);
                             return count;
                         }
@@ -254,7 +250,6 @@ int scanf(char* fmt, ...)
                         for(i=1; isdigit(*buf) && i < BUF_SIZE - 1; buf++, i++){ 
                             //Copio el resto de los digitos
                             aux[i] = *buf;
-                            printf("%c \n", *buf);
                         }
                         aux[i] = '\0';
                         *int_ptr = atoi(aux);

@@ -1,3 +1,4 @@
+#include "getnum.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -52,15 +53,16 @@ void getCommand(){
 			putchar(c);
 		}
 	}
-
 	cmd_buffer[i] = 0; //Null termination
 	return;
 }
 
 
 void processCommand(){
-	if(starts_with(cmd_buffer, "echo ")){
+	if(cmd_buffer[0] == 0){
 		putchar('\n');
+	}
+	else if(starts_with(cmd_buffer, "echo ")){
 		puts(cmd_buffer + 5);
 		putchar('\n');
 	}
@@ -73,6 +75,6 @@ void processCommand(){
 		run = 0;
 	}
 	else{
-		puts("\nNo such command\n");
+		printf("\nInvalid command \n");
 	}
 }

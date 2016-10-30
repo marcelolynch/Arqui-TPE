@@ -20,7 +20,7 @@ void move_line(int from, int to){
 
 void shift_screen_up(){
 	int i;
-	for(i = 0 ; i < VROWS - 1; i++){
+	for(i = 0 ; i < VROWS; i++){
 		move_line(i+1, i);
 	}
 	char* last_line = video + (VROWS-1)*LINE_BYTES;
@@ -42,7 +42,7 @@ void newline(){
 	int padding = LINE_BYTES - (currentpos - video)%LINE_BYTES;
 	currentpos += padding;
 
-	if(currentpos >= LAST_BYTE){
+	while(currentpos >= LAST_BYTE){
 		shift_screen_up();
 	}
 }
@@ -56,12 +56,18 @@ void screen_write(char* s, uint64_t size){
 			*currentpos = ' ';
 		}else if (next == '\n'){
 			newline();
+		}else if(next == '\t'){
+			int i;
+			for(i = 0 ; i < 4 ; i++){
+				*(currentpos++) = ' ';
+				*(currentpos++) = DEF_FORMAT;
+			}
 		}
 		else{
-		*(currentpos++) = next;
-		*(currentpos++) = DEF_FORMAT;
+			*(currentpos++) = next;
+			*(currentpos++) = DEF_FORMAT;
 		}
-		if(currentpos == LAST_BYTE){
+		while(currentpos >= LAST_BYTE){
 			shift_screen_up();
 		}
 	}
