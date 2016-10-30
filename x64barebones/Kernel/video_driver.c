@@ -1,6 +1,6 @@
 #include "video_driver.h"
 
-static const char * video =  (char *)0xB8000;
+static char * video =  (char *)0xB8000;
 static char * currentpos = (char *)0xB8000;
 #define VCOLS 80
 #define VROWS 25

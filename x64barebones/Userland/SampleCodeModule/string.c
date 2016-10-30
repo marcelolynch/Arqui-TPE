@@ -22,6 +22,13 @@ int strcmp(char * s1, char * s2){
 }
 
 
+int strncmp(char * s, char * t, unsigned int n) {
+	int i;
+	for (i = 0; i < n-1 && s[i] != '\0' && t[i] != '\0' && s[i] == t[i]; i++)
+		;
+	return s[i]-t[i];
+}
+
 //Devuelve TRUE si start es subcadena inicial de str, FALSE (0) 
 //si esto no pasa
 int starts_with(char * str, char * start){
@@ -48,4 +55,12 @@ char * strncpy ( char * destination, char * source, int size){
 	}
 	*destination = '\0';
 	return ret;
+}
+
+int strchr(char*str, char c){
+	while(*str){
+		if(*str++ == c)
+			return 1;
+	}
+	return 0;
 }

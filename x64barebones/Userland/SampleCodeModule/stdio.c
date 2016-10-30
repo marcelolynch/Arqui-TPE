@@ -1,6 +1,6 @@
 #include "syscalls.h"
 #include "string.h"
-#include <stdarg.h>
+#include "stdio.h"
 
 #define STDOUT 1
 #define STDIN 0
@@ -31,15 +31,35 @@ void puts(char * s){
 
 
 
+void getline(char * buf, int max){
+    int i = 0;
+    int c;
+    while(i < max - 1 && (c = getchar()) != '\n'){
+        buf[i++] = c;
+    }
+    buf[i] = '\0'
+}
+
 
 void printf(char* fmt, ...) 
 { 
-    char *traverse; 
+
+	va_list arg; 
+    va_start(arg, fmt); 
+
+    vprintf(fmt, arg);
+
+    //Cerrando la lista variable
+    va_end(arg); 
+} 
+
+
+void vprintf(char *fmt, va_list arg){
+	
+	char *traverse; 
     unsigned int i; 
     char *s; 
 
-    va_list arg; 
-    va_start(arg, fmt); 
 
     for(traverse = fmt; *traverse != '\0'; traverse++) 
     { 
@@ -84,9 +104,8 @@ void printf(char* fmt, ...)
         }   
     } 
 
-    //Cerrando la lista variable
-    va_end(arg); 
-} 
+
+}
 
 
 void sprintf(char* buf, char* fmt, ...) 
@@ -177,3 +196,6 @@ static char *convert(unsigned int num, int base)
 
     return(ptr); 
 }
+
+
+

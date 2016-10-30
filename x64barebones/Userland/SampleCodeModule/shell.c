@@ -6,7 +6,7 @@
 
 #define SHELLMSG  " ___| |__   ___| | |  ___\n/ __| '_ \\ / _ \\ | | / __|\n\\__ \\ | | |  __/ | || (__ \n|___/_| |_|\\___|_|_(_)___|\n"
 
-
+void fanorona();
 void shell();
 void getCommand();
 void processCommand();
@@ -25,7 +25,7 @@ void shell(){
 
 	sys_clrscrn();
 	puts(SHELLMSG);
-	
+
 	run = 1;
 	while(run){
 		putchar('>');
