@@ -495,13 +495,16 @@ tPartida generarPartida(int fils, int cols, int modo){
 	/* Reserva memoria para la estructura y devuelve
 	** el puntero a la misma en su nombre */
 
-	tPartida partida = malloc(sizeof(*partida));	
+	tPartida partida = malloc(sizeof(*partida));
 
 	/* Esta validacion deberia estar hecha por el front-end, pero 
 	** nunca se sabe */
 	if( fils < MIN_DIM || fils > MAX_DIM || cols < MIN_DIM || cols > MAX_DIM
-		 || cols%2==0 || fils%2 == 0 || cols<fils || (modo != PVE && modo != PVP))
+		 || cols%2==0 || fils%2 == 0 || cols<fils || (modo != PVE && modo != PVP)){
+					printf("\n ret null 1\n");
+
 		return NULL;
+}
 
 	if(partida != NULL){
 		partida->modo = modo;
@@ -548,7 +551,8 @@ static tTablero generarTablero(int fils, int cols, int modo){
 
 	tablero.filas=fils;
 	tablero.cols=cols;
-	
+
+
 	rellenarTablero(&tablero);
 
 	if(modo==PVE){
@@ -566,7 +570,6 @@ static tTablero generarTablero(int fils, int cols, int modo){
 static tCasilla ** generarMatrizTablero(int fils, int cols){
 	/* Reserva la memoria para una matriz de casillas
 	** (tablero de fils x cols) y la devuelve en su nombre */
-
 	tCasilla ** matriz;
 	int i;
 	
@@ -577,8 +580,15 @@ static tCasilla ** generarMatrizTablero(int fils, int cols){
 		
 	for(i=0; i < fils; i++)
 	{	
+	
+		matriz[i] = malloc(cols*sizeof(tCasilla));
+		printf("\nMatriz %x \n\n", matriz[i]);
+		
 		void * ptr = malloc(cols*sizeof(tCasilla));
 		matriz[i] = (tCasilla*)ptr;
+		printf("\nMatriz %x \n\n", matriz[i]);
+
+		while(1);
 		if(matriz[i] == NULL){
 			liberarTodo(matriz, i);
 			return NULL;
@@ -651,6 +661,7 @@ static void rellenarTablero(tTablero * tablero){
 static void liberarTodo(tCasilla ** matriz, int n){
 	/* Libera la memoria reservada para una matriz 
 	** de casillas (tablero) */	
+				printf("\nLiberating\n");
 
 	int i;
 	for(i=0; i<n ; i++)
@@ -687,8 +698,8 @@ static void actualizarTablero(tPartida partida, tMovimiento * mov){
 	int fini, cini;
 	int jugador = tablero->matriz[mov->coordOrig.fil][mov->coordOrig.col].ocupante;
 	int enemigo = !jugador;
-	/* La direccion del movimiento a realizar se guardó en direccionPrevia 
-	** cuando se llamó a validarMovimiento */
+	/* La direccion del movimiento a realizar se guardÃ³ en direccionPrevia 
+	** cuando se llamÃ³ a validarMovimiento */
 	enum tDireccion direccion = partida->direccionPrevia;
 
 	incrementoSegunDir(&dirFil, &dirCol, direccion);
@@ -998,7 +1009,7 @@ static int jugadaObligada(const tPartida partida, int jugador, tCoordenada orige
 		if(tablero->matriz[destino.fil][destino.col].estado != TOCADA 
 		   && direcciones[dir] != partida->direccionPrevia)
 		 /* Solo chequeo si hay comida si no visite esa casilla antes 
-		 ** y no es la misma dirección de antes */
+		 ** y no es la misma direcciÃ³n de antes */
 			if(hayComida(jugador, tablero, origen, direcciones[dir])!=NINGUNO)
 				return 1; /*Debe capturar esa pieza la proxima jugada */
 		}

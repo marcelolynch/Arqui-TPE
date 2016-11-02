@@ -544,7 +544,6 @@ const char *salteaEspacios (const char str[], int *cantEspacios) {
 void imprimirTablero (const tPartida partida){
 	int i, j;
 	static char idColor[]={'B', 'N', 'O'}; /*BLANCO, NEGRO, VACIO*/
-
 	for(i=-1; i< numFilas(partida) ; i++)
 		{	putchar('\n');
 			if(i<0)

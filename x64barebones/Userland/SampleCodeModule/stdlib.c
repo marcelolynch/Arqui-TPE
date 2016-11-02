@@ -2,8 +2,9 @@
 #include "syscalls.h"
 #include "ctype.h"
 
-void * malloc(uint64_t bytes){
+void* malloc(uint64_t bytes){
 	void * ret = (void*)sys_memalloc(bytes);
+	printf("\nMalloc returning %d bytes from address 0x%x\n", bytes, ret);
 	return ret;
 }
 
@@ -11,7 +12,7 @@ void free(void * ptr){
 	return;
 }
 
-void * realloc(void * ptr, uint64_t size){
+void* realloc(void * ptr, uint64_t size){
 	return ptr;
 }
 

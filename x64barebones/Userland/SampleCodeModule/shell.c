@@ -63,6 +63,7 @@ void processCommand(){
 		putchar('\n');
 	}
 	else if(starts_with(cmd_buffer, "echo ")){
+		putchar('\n');
 		puts(cmd_buffer + 5);
 		putchar('\n');
 	}

@@ -32,6 +32,7 @@ setPicMaster:
 	
 	mov rax, rdi
 	out 21h, al
+	call outportb
 	
 	mov rsp, rbp
 	pop rbp
@@ -58,4 +59,13 @@ cpuVendor:
 
 	mov rsp, rbp
 	pop rbp
+	ret
+
+
+;Recibo en el primer parametro (RDI) el puerto de salida
+;En el segundo (RSI) el dato a escribir (se escribe el byte menos significativo)
+outportb:
+	mov rax, rsi
+	mov rdx, rdi
+	out dx, al
 	ret
