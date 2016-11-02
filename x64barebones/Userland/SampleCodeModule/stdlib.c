@@ -8,6 +8,14 @@ void* malloc(uint64_t bytes){
 	return ret;
 }
 
+static void * mem_pointer = (void*)0x1000000; //Doy memoria a partir del 10mo mega porque pinta
+void * myalloc(uint64_t size){
+	void * ptr = mem_pointer;
+	mem_pointer += size; 
+	return ptr;
+}
+
+
 void free(void * ptr){
 	return;
 }

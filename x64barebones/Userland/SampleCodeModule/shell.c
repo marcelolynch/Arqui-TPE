@@ -24,7 +24,7 @@ int main() {
 static int run;
 void shell(){
 
-	int a= 100, b;
+//	int a= 100, b;
 
 	sys_clrscrn();
 	puts(SHELLMSG);

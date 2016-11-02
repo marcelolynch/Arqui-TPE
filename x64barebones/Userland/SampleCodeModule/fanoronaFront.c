@@ -299,9 +299,18 @@ void pedirDimensiones(int * filas, int * columnas){
 
 int leerLinea(char str[], int dim){
 	int c, i;
-
-	for (i=0; i<dim-1 && (c=getchar())!='\n'; i++)
-		str[i] = c;
+	int count = 0;
+	for (i=0; i<dim-1 && (c=getchar())!='\n'; i++){
+		if(c!='\b' || count > 0){
+		putchar(c);
+		if(c != '\b'){
+			count++;
+			str[i] = c;
+		}else{
+			count--;
+		}
+		}
+	}
 	if (c != '\n')
 		BORRA_BUFFER;
 

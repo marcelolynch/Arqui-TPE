@@ -15,4 +15,6 @@ void * realloc(void * ptr, uint64_t size);
 
 int atoi(char *str);
 
+void * myalloc(uint64_t size);
+
 #endif

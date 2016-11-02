@@ -35,11 +35,7 @@
 
 #include <stdint.h>
 #include <naiveConsole.h>
-
-
-void sysOutLong( uint16_t addr, uint32_t data);
-uint32_t sysInLong(uint16_t addr);
-
+#include <port.h>
 
 typedef struct {
             uint32_t portBase;

@@ -588,7 +588,6 @@ static tCasilla ** generarMatrizTablero(int fils, int cols){
 		matriz[i] = (tCasilla*)ptr;
 		printf("\nMatriz %x \n\n", matriz[i]);
 
-		while(1);
 		if(matriz[i] == NULL){
 			liberarTodo(matriz, i);
 			return NULL;
@@ -661,8 +660,6 @@ static void rellenarTablero(tTablero * tablero){
 static void liberarTodo(tCasilla ** matriz, int n){
 	/* Libera la memoria reservada para una matriz 
 	** de casillas (tablero) */	
-				printf("\nLiberating\n");
-
 	int i;
 	for(i=0; i<n ; i++)
 		free(matriz[i]);

@@ -86,7 +86,7 @@ void * initializeKernelBinary()
 
 	//checkAllBuses(0, 1);
 	findRTL();
-	while(1);
+	//while(1);
 
 	((EntryPoint)sampleCodeModuleAddress)();
 
