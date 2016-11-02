@@ -20,7 +20,8 @@ irq1Handler:
 irq8Handler:
 	irqHandler 8
 
-
+irq11Handler:
+	irqHandler 11
 
 sti:
 	sti

@@ -245,7 +245,8 @@ void findRTL(){
             ncPrint("FUNCTION: 0x"); ncPrintHex(d->function & 0xFF); ncNewline();
             ncPrint("Vendor ID: 0x"); ncPrintHex(d->vendor_id & 0xFFFF); ncNewline();
             ncPrint("Device ID: 0x"); ncPrintHex(d->device_id & 0xFFFF); ncNewline();
-            ncPrint("Interrupt 0x"); ncPrintHex(d->interrupt); ncNewline();
+            ncPrint("Interrupt line 0x"); ncPrintHex(d->interrupt & 0xFF); ncNewline();
+            ncPrint("Interrupt pin 0x"); ncPrintHex((d->interrupt >> 8)& 0xFF); ncNewline();
             ncPrint("Base port 0x"); ncPrintHex(d->portBase); ncNewline();
             ncNewline();
          }

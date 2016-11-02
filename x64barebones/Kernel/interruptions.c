@@ -40,6 +40,11 @@ void iSetHandler(int index, uint64_t handler) {
 void tickHandler() {
 }
 
+
+void rtlInterrupt(){
+	ncPrint("Interrupting");
+}
+
 void sti();
 void irq0Handler();
 void irq1Handler();
@@ -52,7 +57,9 @@ void setPicMaster(uint16_t);
 typedef void (*handler_t)(void);
 
 handler_t handlers[] = {tickHandler, //IRQ0 - timer tick
-						keyboardHandler,
+						keyboardHandler, //IRQ1 - keyboard
+						0, 0, 0, 0, 0, 0, 0,0,0,  //IRQ2 - IRQ10 sin uso
+						rtlInterrupt
 						};
 
 void irqDispatcher(int irq) {

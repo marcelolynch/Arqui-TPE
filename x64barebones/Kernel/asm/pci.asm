@@ -62,7 +62,48 @@ sysOutLong:
 	ret
 
 
-;sysOutLong( uint16_t addr);
+;    sysOutLong( uint16_t addr, uint32 data);
+;                      RDI          RSI
+sysOutWord:
+	push rbx
+	push rax 
+
+	mov rbx, rdi
+	and rbx, 0xFFFF ;16 bits
+
+	mov rax, rsi
+
+	mov dx, bx
+	out dx, ax
+	
+
+	pop rax
+	pop rbx
+	ret
+
+;    sysOutLong( uint16_t addr, uint32 data);
+;                      RDI          RSI
+sysOutByte:
+	push rbx
+	push rax 
+
+	mov rbx, rdi
+	and rbx, 0xFFFF ;16 bits
+
+	mov rax, rsi
+
+	mov dx, bx
+	out dx, al
+	
+
+	pop rax
+	pop rbx
+	ret
+
+
+
+
+;sysInLong( uint16_t addr);
 ;                 RDI
 ;
 sysInLong
