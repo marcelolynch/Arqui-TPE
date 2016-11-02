@@ -6,6 +6,10 @@
 #define PCI_CONFIG_ADDRESS  0x0CF8
 #define PCI_CONFIG_DATA     0x0CFC
 
+#define INPUT_OUTPUT 1
+#define MEMORY_MAPPING 0
+#define NULL 0
+
 // ;ddress dd 10000000000000000000000000000000b
 /* ;          /\     /\      /\   /\ /\    /\    */
 // ;        E    Res    Bus    Dev  F  Reg   0
@@ -52,6 +56,19 @@ typedef struct {
 typedef PCIDescriptor_t * PCIDescriptor;
 
 
+typedef struct
+        {
+            uint8_t* address;
+            uint32_t size;
+            uint8_t type;
+        }  BaseAddressRegister;
+
+BaseAddressRegister getBAR(uint8_t bus, uint8_t device, uint8_t function, uint16_t bar);
+
+
+
+
+
 static int count = 0;
 void printPCID(PCIDescriptor d){
     ncPrint("BUS: 0x"); ncPrintHex(d->bus); 
@@ -93,7 +110,8 @@ void printPCID(PCIDescriptor d){
 
 PCIDescriptor_t getDescriptor(uint8_t bus, uint8_t device, uint8_t function){
     PCIDescriptor_t result;
- 
+    int barNum;
+
     result.bus = bus;
     result.device = device;
     result.function = function;
@@ -106,12 +124,56 @@ PCIDescriptor_t getDescriptor(uint8_t bus, uint8_t device, uint8_t function){
     result.interface_id = pciConfigReadWord(bus, device, function, 0x09);
 
     result.revision = pciConfigReadWord(bus, device, function, 0x08);
-    result.interrupt = (pciConfigReadWord(bus, device, function, 0x3c) >> 8) && 0xff;
+    result.interrupt = pciConfigReadWord(bus, device, function, 0x3c);
     
-    result.portBase = pciConfigReadWord(bus, device, function, 0xE);
+    for(barNum = 0; barNum < 6; barNum++)
+                {
+                    BaseAddressRegister bar = getBAR(bus, device, function, barNum);
+                    if(bar.address && (bar.type == INPUT_OUTPUT))
+                        result.portBase = (uint32_t)bar.address;
+                }
 
     return result;
 }
+
+
+
+BaseAddressRegister getBAR(uint8_t bus, uint8_t device, uint8_t function, uint16_t bar){
+
+    BaseAddressRegister result;
+    result.address = 0;
+   
+    uint32_t headertype = pciConfigReadWord(bus, device, function, 0x0E) & 0x7F;
+    int maxBARs = 6 - (4*headertype);
+   
+    if(bar >= maxBARs)
+        return result;
+    
+    uint32_t bar_value = pciConfigReadWord(bus, device, function, 0x10 + 4*bar);
+    result.type = (bar_value & 0x1) ? INPUT_OUTPUT : MEMORY_MAPPING;
+    uint32_t temp;
+    
+    if(result.type == MEMORY_MAPPING)
+    {
+        switch((bar_value >> 1) & 0x3)
+        {
+            
+            case 0: // 32 Bit Mode
+            case 1: // 20 Bit Mode
+            case 2: // 64 Bit Mode
+                break;
+        }
+        
+    }
+    else // INPUT_OUTPUT
+    {
+        result.address = (uint8_t*)(bar_value & ~0x3);
+    }
+    
+    
+    return result;
+}
+
 
 
 
@@ -180,7 +242,7 @@ void findRTL(){
             ncPrint("Vendor ID: 0x"); ncPrintHex(d->vendor_id & 0xFFFF); ncNewline();
             ncPrint("Device ID: 0x"); ncPrintHex(d->device_id & 0xFFFF); ncNewline();
             ncPrint("Interrupt 0x"); ncPrintHex(d->interrupt); ncNewline();
-            ncPrint("Base port"); ncPrintHex(d->portBase); ncNewline();
+            ncPrint("Base port 0x"); ncPrintHex(d->portBase); ncNewline();
             ncNewline();
          }
      }
