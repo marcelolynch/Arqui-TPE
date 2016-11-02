@@ -1,10 +1,17 @@
-//http://wiki.osdev.org/PCI 
+// Documentacion:
+// http://wiki.osdev.org/PCI 
+// Varias funciones adaptadas de: https://github.com/AlgorithMan-de/wyoos/ (porteadas de C++)
+
+
 // ;Configuration Mechanism One has two IO port rages associated with it.
 // ;The address port (0xcf8-0xcfb) and the data port (0xcfc-0xcff).
 // ;A configuration cycle consists of writing to the address port to specify which device and register you want to access and then reading or writing the data to the data port.
 
 #define PCI_CONFIG_ADDRESS  0x0CF8
 #define PCI_CONFIG_DATA     0x0CFC
+
+#define RTL_VENDOR_ID 0x10EC 
+#define RTL_DEVICE_ID 0x8139
 
 #define INPUT_OUTPUT 1
 #define MEMORY_MAPPING 0
@@ -215,9 +222,6 @@ BaseAddressRegister getBAR(uint8_t bus, uint8_t device, uint8_t function, uint16
      }
  }
 
-
-#define RTL_VENDOR_ID 0x10EC 
-#define RTL_DEVICE_ID 0x8139
 
 void findRTL(){
      ncClear();
