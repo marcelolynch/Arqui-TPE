@@ -1,5 +1,5 @@
 // Documentacion:
-// http://wiki.osdev.org/PCI 
+// http://wiki.osdev.org/PCI
 // Varias funciones adaptadas de: https://github.com/AlgorithMan-de/wyoos/ (porteadas de C++)
 
 
@@ -10,7 +10,7 @@
 #define PCI_CONFIG_ADDRESS  0x0CF8
 #define PCI_CONFIG_DATA     0x0CFC
 
-#define RTL_VENDOR_ID 0x10EC 
+#define RTL_VENDOR_ID 0x10EC
 #define RTL_DEVICE_ID 0x8139
 
 #define INPUT_OUTPUT 1
@@ -40,20 +40,20 @@
 typedef struct {
             uint32_t portBase;
             uint32_t interrupt;
-            
+
             uint8_t bus;
             uint8_t device;
             uint8_t function;
 
             uint16_t vendor_id;
             uint16_t device_id;
-            
+
             uint8_t class_id;
             uint8_t subclass_id;
             uint8_t interface_id;
 
             uint8_t revision;
-            
+
         }PCIDescriptor_t;
 
 typedef PCIDescriptor_t * PCIDescriptor;
@@ -74,8 +74,8 @@ BaseAddressRegister getBAR(uint8_t bus, uint8_t device, uint8_t function, uint16
 
 static int count = 0;
 void printPCID(PCIDescriptor d){
-    ncPrint("BUS: 0x"); ncPrintHex(d->bus); 
-    ncPrint(" DEVICE: 0x"); ncPrintHex(d->device & 0xFF); 
+    ncPrint("BUS: 0x"); ncPrintHex(d->bus);
+    ncPrint(" DEVICE: 0x"); ncPrintHex(d->device & 0xFF);
     ncPrint(" FUNCTION: 0x"); ncPrintHex(d->function & 0xFF);
     ncPrint(" Vendor ID: 0x"); ncPrintHex(d->vendor_id & 0xFFFF);
     ncPrint(", Device ID: 0x"); ncPrintHex(d->device_id & 0xFFFF);
@@ -93,14 +93,14 @@ void printPCID(PCIDescriptor d){
     uint32_t lslot = (uint32_t)slot;
     uint32_t lfunc = (uint32_t)func;
     uint16_t tmp = 0;
- 
+
     /* create configuration address as per Figure 1 */
-    address =   (uint32_t)((lbus << 16) 
+    address =   (uint32_t)((lbus << 16)
                 | (lslot << 11)
-                | (lfunc << 8) 
-                | (offset & 0xfc) 
+                | (lfunc << 8)
+                | (offset & 0xfc)
                 | ((uint32_t)0x80000000));
- 
+
     /* write out the address */
     sysOutLong(PCI_CONFIG_ADDRESS, address);
     /* read in the data */
@@ -118,7 +118,7 @@ PCIDescriptor_t getDescriptor(uint8_t bus, uint8_t device, uint8_t function){
     result.bus = bus;
     result.device = device;
     result.function = function;
-    
+
     result.vendor_id = pciConfigReadWord(bus, device, function, 0x00);
     result.device_id = pciConfigReadWord(bus, device, function, 0x02);
 
@@ -128,7 +128,7 @@ PCIDescriptor_t getDescriptor(uint8_t bus, uint8_t device, uint8_t function){
 
     result.revision = pciConfigReadWord(bus, device, function, 0x08);
     result.interrupt = pciConfigReadWord(bus, device, function, 0x3c);
-    
+
     for(barNum = 0; barNum < 6; barNum++)
                 {
                     BaseAddressRegister bar = getBAR(bus, device, function, barNum);
@@ -145,35 +145,35 @@ BaseAddressRegister getBAR(uint8_t bus, uint8_t device, uint8_t function, uint16
 
     BaseAddressRegister result;
     result.address = 0;
-   
+
     uint32_t headertype = pciConfigReadWord(bus, device, function, 0x0E) & 0x7F;
     int maxBARs = 6 - (4*headertype);
-   
+
     if(bar >= maxBARs)
         return result;
-    
+
     uint32_t bar_value = pciConfigReadWord(bus, device, function, 0x10 + 4*bar);
     result.type = (bar_value & 0x1) ? INPUT_OUTPUT : MEMORY_MAPPING;
     uint32_t temp;
-    
+
     if(result.type == MEMORY_MAPPING)
     {
         switch((bar_value >> 1) & 0x3)
         {
-            
+
             case 0: // 32 Bit Mode
             case 1: // 20 Bit Mode
             case 2: // 64 Bit Mode
                 break;
         }
-        
+
     }
     else // INPUT_OUTPUT
     {
         result.address = (uint8_t*)(bar_value & ~0x3);
     }
-    
-    
+
+
     return result;
 }
 
@@ -184,7 +184,7 @@ BaseAddressRegister getBAR(uint8_t bus, uint8_t device, uint8_t function, uint16
      uint8_t function = 0;
      PCIDescriptor_t descriptor = getDescriptor(bus, device, function);
      uint16_t vendorID = descriptor.vendor_id;
-     
+
    if(vendorID == 0xFFFF || vendorID == 0x0000) return;        // Device doesn't exist
 
       printPCID(&descriptor);
@@ -200,7 +200,7 @@ BaseAddressRegister getBAR(uint8_t bus, uint8_t device, uint8_t function, uint16
    //     }
   //  }
  }
- 
+
  void checkFunction(uint8_t bus, uint8_t device, uint8_t function) {
 
  }
@@ -210,7 +210,7 @@ BaseAddressRegister getBAR(uint8_t bus, uint8_t device, uint8_t function, uint16
      uint8_t bus;
      uint8_t device;
      ncClear();
-    
+
      for(bus = from; bus < to; bus++) {
          for(device = 0; device < 32; device++) {
              checkDevice(bus, device);
@@ -221,36 +221,33 @@ BaseAddressRegister getBAR(uint8_t bus, uint8_t device, uint8_t function, uint16
 
 void findRTL(){
      ncClear();
-     PCIDescriptor_t descriptor; 
+     PCIDescriptor_t descriptor;
      int bus, device, function;
 
      for(bus = 0; bus < 256; bus++) {
          for(device = 0; device < 32; device++) {
-        for(function = 0 ; function < 8; function++){
-                
-         descriptor = getDescriptor(bus, device, function);
-         uint16_t vendorID = descriptor.vendor_id;
-         uint16_t deviceID = descriptor.device_id;
-     
-         if(vendorID == RTL_VENDOR_ID || vendorID == RTL_DEVICE_ID){        // Device doesn't exist
-            PCIDescriptor d = &descriptor;
-            ncPrint("Found RTL8139");
-            ncNewline();
-            ncPrint("BUS: 0x"); ncPrintHex(d->bus); ncNewline();
-            ncPrint("DEVICE: 0x"); ncPrintHex(d->device & 0xFF); ncNewline();
-            ncPrint("FUNCTION: 0x"); ncPrintHex(d->function & 0xFF); ncNewline();
-            ncPrint("Vendor ID: 0x"); ncPrintHex(d->vendor_id & 0xFFFF); ncNewline();
-            ncPrint("Device ID: 0x"); ncPrintHex(d->device_id & 0xFFFF); ncNewline();
-            ncPrint("Interrupt line 0x"); ncPrintHex(d->interrupt & 0xFF); ncNewline();
-            ncPrint("Interrupt pin 0x"); ncPrintHex((d->interrupt >> 8)& 0xFF); ncNewline();
-            ncPrint("Base port 0x"); ncPrintHex(d->portBase); ncNewline();
-            ncNewline();
-         }
+            for(function = 0 ; function < 8; function++){
+                    
+             descriptor = getDescriptor(bus, device, function);
+             uint16_t vendorID = descriptor.vendor_id;
+             uint16_t deviceID = descriptor.device_id;
+
+             if(vendorID == RTL_VENDOR_ID || vendorID == RTL_DEVICE_ID){        // Device doesn't exist
+                PCIDescriptor d = &descriptor;
+                ncPrint("Found RTL8139");
+                ncNewline();
+                ncPrint("BUS: 0x"); ncPrintHex(d->bus); ncNewline();
+                ncPrint("DEVICE: 0x"); ncPrintHex(d->device & 0xFF); ncNewline();
+                ncPrint("FUNCTION: 0x"); ncPrintHex(d->function & 0xFF); ncNewline();
+                ncPrint("Vendor ID: 0x"); ncPrintHex(d->vendor_id & 0xFFFF); ncNewline();
+                ncPrint("Device ID: 0x"); ncPrintHex(d->device_id & 0xFFFF); ncNewline();
+                ncPrint("Interrupt line 0x"); ncPrintHex(d->interrupt & 0xFF); ncNewline();
+                ncPrint("Interrupt pin 0x"); ncPrintHex((d->interrupt >> 8)& 0xFF); ncNewline();
+                ncPrint("Base port 0x"); ncPrintHex(d->portBase); ncNewline();
+                ncNewline();
+             }
      }
      }
 
  }
 }
-
-
-

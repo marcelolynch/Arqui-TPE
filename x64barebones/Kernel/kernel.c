@@ -55,7 +55,7 @@ void * initializeKernelBinary()
 	};
 
 	loadModules(&endOfKernelBinary, moduleAddresses);
-	
+
 	ncPrint("[Done]");
 	ncNewline();
 	ncNewline();
@@ -94,5 +94,5 @@ void * initializeKernelBinary()
 }
 
 int main(){
-	return 0;	
+	return 0;
 }
