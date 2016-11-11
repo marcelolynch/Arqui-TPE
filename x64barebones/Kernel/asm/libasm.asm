@@ -1,8 +1,10 @@
 GLOBAL cpuVendor
 GLOBAL sti
 GLOBAL setPicMaster
+GLOBAL setPicSlave
 GLOBAL irq0Handler
 GLOBAL irq1Handler
+GLOBAL irq11Handler
 GLOBAL irq8Handler
 
 EXTERN irqDispatcher
@@ -38,6 +40,15 @@ setPicMaster:
 	mov rsp, rbp
 	pop rbp
 	ret
+
+
+setPicSlave:
+	push    rbp
+    mov     rbp, rsp
+    mov     ax, di  ; en al esa la mascara
+    out	    0A1h, al
+    pop     rbp
+    retn
 
 cpuVendor:
 	push rbp

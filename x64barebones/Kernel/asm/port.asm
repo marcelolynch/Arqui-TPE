@@ -1,6 +1,7 @@
 
 GLOBAL sysOutLong
 GLOBAL sysInLong
+GLOBAL sysInByte
 GLOBAL sysOutWord
 GLOBAL sysOutByte
 
@@ -85,7 +86,7 @@ sysInLong
 	ret
 
 
-;sysInLong( uint16_t addr);
+;sysInByte( uint16_t addr);
 ;                 RDI
 ;
 sysInByte

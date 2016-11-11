@@ -1,8 +1,18 @@
 //http://wiki.osdev.org/RTL8139
 #include <port.h>
+#include <stdint.h>
+#include <naiveConsole.h>
+
+void * _memalloc(uint64_t size);
 
 #define IOADDR 0xC000
+
+#define TSAD0_OFFSET 0x20
+#define TSD0_OFFSET 0x10 
+
+
 static void* receiveBuffer;
+
 void rtl_init(){
 
 	// ===Turning on the RTL8139 ===
@@ -33,8 +43,8 @@ void rtl_init(){
  	//ioaddr is obtained from PCI configuration
  	//sysOutLong(IOADDR + 0x30, (uintptr_t)rx_buffer);  send uint32_t memory location to RBSTART (0x30)
  	//to the RBSTART register (0x30).
-	receiveBuffer = syss_memalloc(8*1024+16,0,0);
-	sysOutLong(IOADDR + 0x30, receiveBuffer);
+	receiveBuffer = _memalloc(8*1024+16);
+	sysOutLong(IOADDR + 0x30, (uint32_t)receiveBuffer);
 
 
  //===Set IMR + ISR=======
@@ -78,8 +88,6 @@ void rtl_init(){
 	sysOutLong(IOADDR + 0x44, 0xf | (1 << 7)); // (1 << 7) is the WRAP bit, 0xf is AB+AM+APM+AAP
 
 
-
-
 // ==== Enable Receive and Transmitter ====
 
 // Now is the time to start up the RX and TX functions.
@@ -99,4 +107,40 @@ void rtlHandler(){
 	// Aca habria que mirar que el bit 15(TOK) del descriptor sea 1, que indica que la transmision
 	// de un packet fue exitosa, y hay que levantar la data que dejo en el receiveBuffer e imprimirla.
 	// No se donde encontrar el descriptor. Tambien habria que mirar como hacer para enviar datos
+	ncPrint("HOLA!");
+	ncNewline();
 }
+
+
+void rtlPrintMac(){
+	ncPrint("MAC: ");
+	ncPrintHex(sysInByte(IOADDR));
+	ncPrint(":");
+	ncPrintHex(sysInByte(IOADDR + 1));
+	ncPrint(":");
+	ncPrintHex(sysInByte(IOADDR + 2));
+	ncPrint(":");
+	ncPrintHex(sysInByte(IOADDR + 3));	
+	ncPrint(":");
+	ncPrintHex(sysInByte(IOADDR + 4));	
+	ncPrint(":");
+	ncPrintHex(sysInByte(IOADDR + 5));	
+}
+
+/*
+void memcpy(void * dst, void * src, uint32_t size){
+	while(size--){
+		char * dest = dst;
+		char * source = src;
+		*(dest++) = *(source++); 
+	}
+}*/
+
+
+void rtlSend(){
+	void * myMsg = _memalloc(1000);
+	//char mac[] = {0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00};
+
+
+}
+

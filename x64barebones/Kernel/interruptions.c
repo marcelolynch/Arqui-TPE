@@ -41,18 +41,17 @@ void tickHandler() {
 }
 
 
+void ncPrint(char*s);
 void rtlInterrupt(){
 	ncPrint("Interrupting");
 }
 
-void sti();
-void irq0Handler();
-void irq1Handler();
 
 
 void syscallHandler();
 
 void setPicMaster(uint16_t);
+void setPicSlave(uint16_t);
 
 typedef void (*handler_t)(void);
 
@@ -74,11 +73,12 @@ void initInterruptions()
 	iSetHandler(0x21, (uint64_t) irq1Handler);
 //	iSetHandler(0x28, (uint64_t) irq8Handler);
 
- iSetHandler(0x108B, (uint64_t) irq11Handler); // 0x108B Es la direccion que devuelve la intterupt line del rtl en el pci
+	iSetHandler(0x108B, (uint64_t) irq11Handler); // 0x108B Es la direccion que devuelve la intterupt line del rtl en el pci
 
 	iSetHandler(0x80,(uint64_t)syscallHandler);
 	//iSetHandler(0x)
 	setPicMaster(0x7C); //0111 1100
+	setPicSlave(0x0); //Habilito todo, ni idea
 
 	sti();
 }
