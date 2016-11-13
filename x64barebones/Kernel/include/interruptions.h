@@ -6,6 +6,9 @@
 void iSetHandler(int index, uint64_t handler);
 void initInterruptions(void);
 
+
+void setPIC();
+
 void sti();
 void irq0Handler();
 void irq1Handler();

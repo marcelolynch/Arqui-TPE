@@ -47,6 +47,7 @@ setPicSlave:
     mov     rbp, rsp
     mov     ax, di  ; en al esa la mascara
     out	    0A1h, al
+    out	    0A0h, al
     pop     rbp
     retn
 

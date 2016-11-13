@@ -4,5 +4,6 @@
 void rtlSend();
 void rtl_init();
 void rtlPrintMac();
+void printDetails();
 
 #endif

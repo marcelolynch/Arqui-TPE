@@ -7,8 +7,15 @@ void * _memalloc(uint64_t size);
 
 #define IOADDR 0xC000
 
-#define TSAD0_OFFSET 0x20
-#define TSD0_OFFSET 0x10 
+#define TSAD0 (IOADDR + 0x20)
+#define TSAD1 (IOADDR + 0x24)
+#define TSAD2 (IOADDR + 0x28)
+#define TSAD3 (IOADDR + 0x2C)
+
+#define TSD0 (IOADDR + 0x10)
+#define TSD1 (IOADDR + 0x14)
+#define TSD2 (IOADDR + 0x18)
+#define TSD3 (IOADDR + 0x1C) 
 
 
 static void* receiveBuffer;
@@ -100,6 +107,7 @@ void rtl_init(){
 // Once this is completed, then the card will start allowing packets in and/or out.
 
 sysOutByte(IOADDR + 0x37, 0x0C); // Sets the RE and TE bits high
+ncPrint("Init"); ncNewline();
 }
 
 
@@ -137,10 +145,76 @@ void memcpy(void * dst, void * src, uint32_t size){
 }*/
 
 
-void rtlSend(){
-	void * myMsg = _memalloc(1000);
-	//char mac[] = {0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00};
+int strlen(char * str){
+	int count=0;
+	while(*str++)
+		count++;
+	return count;
+}
 
+
+//static uint8_t tx_buffer0[1000];
+
+void rtlSend(){
+	void * tx_buffer0 = _memalloc(1000);	
+	uint8_t myMAC[6] = {0};
+	int i;
+	for(i=0; i < 6 ; i++){
+		myMAC[i] = sysInByte(IOADDR + i);
+	}
+
+	int size = 0;
+
+
+
+	memcpy(tx_buffer0, "\xff\xff\xff\xff\xff\xff", 6);
+
+	memcpy(tx_buffer0+6, myMAC, 6);
+
+	memcpy(tx_buffer0+12, "\x00\x00", 2);
+	size += 14;
+
+	char * str = "HELLO WORLD GouoiuiSADHGFEYSFGfjsdlkfkjjsdlkfjsdlkfDSHFGSDFGDSHGFH";
+	memcpy(tx_buffer0+14, str, strlen(str));
+
+	size+= strlen(str);
+	sysOutLong(TSAD0, (uint32_t)tx_buffer0);
+	sysOutLong(TSAD1, (uint32_t)tx_buffer0);
+	sysOutLong(TSAD2, (uint32_t)tx_buffer0);
+	sysOutLong(TSAD3, (uint32_t)tx_buffer0);
+
+	uint32_t descriptor = size; //Bits 0-12: Size
+	descriptor &= ~(1 << 13); //Apago el bit 13
+	descriptor &= ~(0x3f << 16);	// 21-16 threshold en 0
+
+	sysOutLong(TSD0, descriptor);
+	sysOutLong(TSD1, descriptor);
+	sysOutLong(TSD2, descriptor);
+	sysOutLong(TSD3, descriptor);
+	ncPrint("Descriptor: 0x"); ncPrintHex(descriptor);
+	ncNewline();
+
+	printDetails("IN ");
+
+	ncPrint("Sent");
+	ncNewline();
 
 }
 
+void printDetails(char* msg){
+	ncNewline();
+	ncPrint(msg);
+	ncPrint("   TSD0: 0x");
+	ncPrintHex(sysInLong(TSD0));
+	ncNewline();
+	ncPrint("TSD1: 0x");
+	ncPrintHex(sysInLong(TSD1));
+	ncNewline();
+	ncPrint("TSD2: 0x");
+	ncPrintHex(sysInLong(TSD2));
+	ncNewline();
+	ncPrint("TSD3: 0x");
+	ncPrintHex(sysInLong(TSD3));
+	ncNewline();
+
+}

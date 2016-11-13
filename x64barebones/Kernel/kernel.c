@@ -90,6 +90,7 @@ void * initializeKernelBinary()
 	rtl_init();
 	rtlHandler();
 	rtlPrintMac();
+	rtlSend();
 	while(1);
 
 	((EntryPoint)sampleCodeModuleAddress)();
