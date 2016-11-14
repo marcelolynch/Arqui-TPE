@@ -2,6 +2,7 @@
 GLOBAL sysOutLong
 GLOBAL sysInLong
 GLOBAL sysInByte
+GLOBAL sysInWord
 GLOBAL sysOutWord
 GLOBAL sysOutByte
 
@@ -100,6 +101,26 @@ sysInByte
 	mov dx, bx
 	in al, dx
 	and rax, 0xff;
+	
+	pop rbx
+
+	ret
+
+
+;sysInByte( uint16_t addr);
+;                 RDI
+;
+sysInWord
+	push rbx
+
+	mov rbx, rdi
+	and rbx, 0xFFFF ;16 bits
+
+	mov rax, rsi
+
+	mov dx, bx
+	in ax, dx
+	and rax, 0xffff;
 	
 	pop rbx
 

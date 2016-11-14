@@ -41,12 +41,11 @@ void tickHandler() {
 
 static int count = 0;
 void ncPrint(char*s);
+
+
+
 void rtlInterrupt(){
-	ncClear();
-	ncNewline();
-	printDetails("Interrupting ");
-	ncPrintDec(count++);
-	setPIC();
+	rtl_interrupt();
 }
 
 

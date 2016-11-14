@@ -86,11 +86,20 @@ void * initializeKernelBinary()
 	initInterruptions();
 
 	//checkAllBuses(0, 1);
+	deviceDetails(0, 0x18);
+	//while(1);
+	initialize_device(0,0x18);
 	findRTL();
+
 	rtl_init();
-	rtlHandler();
 	rtlPrintMac();
 	rtlSend();
+	int i = 100000000000;
+	while(i--);
+	
+	initInterruptions();
+	rtlSend();
+
 	while(1);
 
 	((EntryPoint)sampleCodeModuleAddress)();

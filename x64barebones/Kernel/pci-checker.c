@@ -36,6 +36,7 @@
 #include <stdint.h>
 #include <naiveConsole.h>
 #include <port.h>
+#include <pci.h>
 
 typedef struct {
             uint32_t portBase;
@@ -178,6 +179,19 @@ BaseAddressRegister getBAR(uint8_t bus, uint8_t device, uint8_t function, uint16
 }
 
 
+void os_pci_write_reg(uint8_t bus, uint8_t func, uint16_t port, uint64_t data);
+uint32_t os_pci_read_reg(uint8_t bus, uint8_t func, uint16_t port);
+
+
+
+
+void initialize_device(uint8_t bus, uint8_t dev_func) {
+  uint32_t value = os_pci_read_reg(bus,dev_func,0x04);
+  value |= 0x04;
+  os_pci_write_reg(bus,dev_func,0x04,value);
+
+}
+
 
 
  void checkDevice(uint8_t bus, uint8_t device) {
@@ -218,6 +232,26 @@ BaseAddressRegister getBAR(uint8_t bus, uint8_t device, uint8_t function, uint16
      }
  }
 
+
+
+
+void deviceDetails(uint8_t bus, uint8_t device){
+//0x18
+    PCIDescriptor_t descriptor = getDescriptor(bus, device, 0x4);
+    PCIDescriptor d = &descriptor;
+                ncNewline();
+                ncPrint("BUS: 0x"); ncPrintHex(d->bus); ncNewline();
+                ncPrint("DEVICE: 0x"); ncPrintHex(d->device & 0xFF); ncNewline();
+                ncPrint("FUNCTION: 0x"); ncPrintHex(d->function & 0xFF); ncNewline();
+                ncPrint("Vendor ID: 0x"); ncPrintHex(d->vendor_id & 0xFFFF); ncNewline();
+                ncPrint("Device ID: 0x"); ncPrintHex(d->device_id & 0xFFFF); ncNewline();
+                ncPrint("Interrupt line 0x"); ncPrintHex(d->interrupt & 0xFF); ncNewline();
+                ncPrint("Interrupt pin 0x"); ncPrintHex((d->interrupt >> 8)& 0xFF); ncNewline();
+                ncPrint("Base port 0x"); ncPrintHex(d->portBase); ncNewline();
+                ncNewline();
+
+
+}
 
 void findRTL(){
      ncClear();

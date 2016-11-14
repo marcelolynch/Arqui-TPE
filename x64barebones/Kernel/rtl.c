@@ -1,7 +1,9 @@
 //http://wiki.osdev.org/RTL8139
 #include <port.h>
+#include <rtl.h>
 #include <stdint.h>
 #include <naiveConsole.h>
+#include <ethernet.h>
 
 void * _memalloc(uint64_t size);
 
@@ -15,10 +17,23 @@ void * _memalloc(uint64_t size);
 #define TSD0 (IOADDR + 0x10)
 #define TSD1 (IOADDR + 0x14)
 #define TSD2 (IOADDR + 0x18)
-#define TSD3 (IOADDR + 0x1C) 
+#define TSD3 (IOADDR + 0x1C)
+
+#define ISR (IOADDR + 0x3E) 
+
+
+#define TX_SW_BUFFER_NUM 4
+#define TSD_TOK (1 << 15)
+#define TSD_OWN (1 << 13)
+
+#define TSDSTATUS_0 	100
+#define TSDSTATUS_BOTH 	101
+#define TSDSTATUS_TOK	102
+#define TSDSTATUS_OWN 	103
 
 
 static void* receiveBuffer;
+static uint8_t currentDescriptor;
 
 void rtl_init(){
 
@@ -63,7 +78,7 @@ void rtl_init(){
 		// To set the RTL8139 to accept only the Transmit OK (TOK) and Receive OK (ROK) interrupts,
 		// we would have the TOK and ROK bits of the IMR high and leave the rest low.
 		// That way when a TOK or ROK IRQ happens, it actually will go through and fire up an IRQ.
-	sysOutWord(IOADDR + 0x3C, 0x0005); // Sets the TOK and ROK bits high
+	sysOutWord(IOADDR + 0x3C, 0x000f); // Sets the TOK and ROK bits high
 
 
 //  ====Configuring receive buffer (RCR)=====
@@ -106,8 +121,8 @@ void rtl_init(){
 // To enable the RTL8139 to accept and transmit packets, the RE and TE bits must go high.
 // Once this is completed, then the card will start allowing packets in and/or out.
 
-sysOutByte(IOADDR + 0x37, 0x0C); // Sets the RE and TE bits high
-ncPrint("Init"); ncNewline();
+	sysOutByte(IOADDR + 0x37, 0x0C); // Sets the RE and TE bits high
+	ncPrint("Init"); ncNewline();
 }
 
 
@@ -117,6 +132,29 @@ void rtlHandler(){
 	// No se donde encontrar el descriptor. Tambien habria que mirar como hacer para enviar datos
 	ncPrint("HOLA!");
 	ncNewline();
+}
+
+
+static int count = 0;
+
+void rtl_interrupt(){
+	uint16_t isr = sysInWord(ISR);
+	sysOutWord(ISR, 0x0);
+	ncNewline();
+	ncPrint("Interrupting with ISR: "); ncPrintHex(isr);
+	ncPrint("  count: ");
+	ncPrintDec(count++);
+
+    sysOutLong(IOADDR + 0x3E, 0x1); 
+
+
+    uint32_t tsd = sysInLong(TSD0 + currentDescriptor<<2);
+    tsd &= ~(TSD_OWN); //Clear OWN bit
+    sysOutLong(TSD0 + currentDescriptor<<2, tsd);
+   	currentDescriptor = nextDesc(currentDescriptor);
+
+  	rtl_init();
+	setPIC();
 }
 
 
@@ -153,53 +191,74 @@ int strlen(char * str){
 }
 
 
-//static uint8_t tx_buffer0[1000];
+
+uint8_t nextDesc(uint8_t current)
+{
+ if(current == TX_SW_BUFFER_NUM-1){
+	return 0;
+ }
+ else
+ 	return (1 + current);
+}
+
+
+
+
+uint8_t CheckTSDStatus(uint8_t desc)
+{
+	uint32_t Offset = desc << 2;
+
+ uint32_t tmpTSD = sysInLong(IOADDR + TSD0 + Offset);
+ switch ( tmpTSD & (TSD_OWN | TSD_TOK) )
+ 	{
+	case (TSD_OWN | TSD_TOK): return TSDSTATUS_BOTH;
+	case (TSD_TOK) : return TSDSTATUS_TOK;
+	case (TSD_OWN) : return TSDSTATUS_OWN;
+	case 0 : return TSDSTATUS_0;
+ 	}
+ 
+ return 0;
+}
+
+
+
+
+static ethframe frame;
 
 void rtlSend(){
-	void * tx_buffer0 = _memalloc(1000);	
+	
 	uint8_t myMAC[6] = {0};
 	int i;
 	for(i=0; i < 6 ; i++){
-		myMAC[i] = sysInByte(IOADDR + i);
+		frame.f_hdr.h_source[i] = sysInByte(IOADDR + i);
+		frame.f_hdr.h_dest[i] = '\xff';
 	}
 
-	int size = 0;
+	uint32_t tsd = TSD0 + (currentDescriptor * 4);
+	uint32_t tsad = TSAD0 + (currentDescriptor * 4);
 
 
+	char * str = "CHELO QUE HACESSSSSSSSSSSSSs";
+	memcpy(frame.f_data, str, strlen(str));
 
-	memcpy(tx_buffer0, "\xff\xff\xff\xff\xff\xff", 6);
+	sysOutLong(tsad, (uint32_t)&frame);
 
-	memcpy(tx_buffer0+6, myMAC, 6);
+	
+	ncPrint("Sending to desc: 0x");
+	ncPrintHex(tsad);
+	ncPrint(" with TSD : 0x");
+	ncPrintHex(tsd);
+	ncNewline();
 
-	memcpy(tx_buffer0+12, "\x00\x00", 2);
-	size += 14;
 
-	char * str = "HELLO WORLD GouoiuiSADHGFEYSFGfjsdlkfkjjsdlkfjsdlkfDSHFGSDFGDSHGFH";
-	memcpy(tx_buffer0+14, str, strlen(str));
-
-	size+= strlen(str);
-	sysOutLong(TSAD0, (uint32_t)tx_buffer0);
-	sysOutLong(TSAD1, (uint32_t)tx_buffer0);
-	sysOutLong(TSAD2, (uint32_t)tx_buffer0);
-	sysOutLong(TSAD3, (uint32_t)tx_buffer0);
-
-	uint32_t descriptor = size; //Bits 0-12: Size
+	uint32_t descriptor = 6+6+2+strlen(str); //Bits 0-12: Size
 	descriptor &= ~(1 << 13); //Apago el bit 13
 	descriptor &= ~(0x3f << 16);	// 21-16 threshold en 0
 
-	sysOutLong(TSD0, descriptor);
-	sysOutLong(TSD1, descriptor);
-	sysOutLong(TSD2, descriptor);
-	sysOutLong(TSD3, descriptor);
-	ncPrint("Descriptor: 0x"); ncPrintHex(descriptor);
-	ncNewline();
-
-	printDetails("IN ");
-
-	ncPrint("Sent");
-	ncNewline();
+	sysOutLong(tsd, descriptor);
 
 }
+
 
 void printDetails(char* msg){
 	ncNewline();

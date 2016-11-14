@@ -1,2 +1,2 @@
 #!/bin/bash
-qemu-system-x86_64 -hda Image/x64BareBonesImage.qcow2 -m 512 -net nic,model=rtl8139,macaddr='DE:AD:BE:EF:00:01' -net user -net tap,ifname=tap0,script=no,downscript=no
+qemu-system-x86_64 -hda Image/x64BareBonesImage.qcow2 -m 512 -device rtl8139,netdev=net0,mac=DE:AD:BE:EF:22:22 -netdev tap,id=net0,ifname=tap1,script=no,downscript=no
