@@ -34,8 +34,9 @@ void * _memalloc(uint64_t size);
 
 static ethframe frame;
 
+#define BUF_SIZE 8*1024+16
 
-static void* receiveBuffer;
+static uint8_t receiveBuffer[BUF_SIZE] = {0};
 static uint8_t currentDescriptor;
 
 void rtl_init(){
@@ -57,7 +58,7 @@ void rtl_init(){
 	// NB: There is a minor bug in Qemu. If you check the command register before performing a soft reset,
 	// you may find the RST bit is high (1). Just ignore it and carry on with the initialization procedure.
 	sysOutByte( IOADDR + 0x37, 0x10);
-	//while( (sysInByte(IOADDR + 0x37) & 0x10) != 0) { /* nada */ }
+	while( (sysInByte(IOADDR + 0x37) & 0x10) != 0) { /* nada */ }
 
 
 	//Init Receive buffer
@@ -68,7 +69,6 @@ void rtl_init(){
  	//ioaddr is obtained from PCI configuration
  	//sysOutLong(IOADDR + 0x30, (uintptr_t)rx_buffer);  send uint32_t memory location to RBSTART (0x30)
  	//to the RBSTART register (0x30).
-	receiveBuffer = _memalloc(8*1024+16);
 	sysOutLong(IOADDR + 0x30, (uint32_t)receiveBuffer);
 
 
@@ -131,7 +131,7 @@ void rtl_init(){
 	sysOutLong(TSAD2, (uint32_t)&frame);
 	sysOutLong(TSAD3, (uint32_t)&frame);
 
-	currentDescriptor = 0;
+	//currentDescriptor = 0;
 	ncPrint("Init"); ncNewline();
 }
 
@@ -172,9 +172,9 @@ void rtl_interrupt(){
 
     uint32_t tsd = sysInLong(TSD0 + currentDescriptor<<2);
     tsd &= ~(TSD_OWN); //Clear OWN bit
-    sysOutLong(TSD0 + currentDescriptor<<2, tsd);
-   	currentDescriptor = nextDesc(currentDescriptor);
-   	rtl_init();
+    sysOutLong(TSD0 + currentDescriptor*4, tsd);
+
+   	rtl_init(); //Sin esto no anda (!)
 
 }
 
@@ -251,7 +251,7 @@ void rtlSend(){
 	int i;
 	for(i=0; i < 6 ; i++){
 		frame.f_hdr.h_source[i] = sysInByte(IOADDR + i);
-		frame.f_hdr.h_dest[i] = '\xff';
+		frame.f_hdr.h_dest[i] = '\xfa';
 	}
 
 	uint32_t tsd = TSD0 + (currentDescriptor * 4);
