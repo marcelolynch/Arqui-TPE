@@ -90,10 +90,9 @@ void * initializeKernelBinary()
 	//while(1);
 	initialize_device(0,0x18);
 	findRTL();
-//	while(1);
 	rtl_init();
 	rtlPrintMac();
-	rtlSend();
+/*	rtlSend();
 	int i = 500000000;
 	while(i--);
 	rtlSend();
@@ -101,7 +100,7 @@ void * initializeKernelBinary()
 	while(i--);
 	rtlSend();
 	while(1);
-
+*/
 	((EntryPoint)sampleCodeModuleAddress)();
 
 	return getStackBase();

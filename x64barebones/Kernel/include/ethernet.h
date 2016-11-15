@@ -29,15 +29,15 @@
 
 
 struct ethhdr {
-  unsigned char		h_dest[ETH_ALEN];	/* destination eth addr	*/
-  unsigned char		h_source[ETH_ALEN];	/* source ether addr	*/
-  unsigned short	h_proto;		/* packet type ID field	*/
+  unsigned char		dst[ETH_ALEN];	/* destination eth addr	*/
+  unsigned char		src[ETH_ALEN];	/* source ether addr	*/
+  unsigned short	proto;		/* packet type ID field	*/
 };
 /* This is the complete Ethernet frame. */
 
 typedef struct{
-  struct ethhdr		f_hdr;			/* frame header		*/
-  char			f_data[ETH_DLEN];	/* frame data (variable)*/
+  struct ethhdr	hdr;			/* frame header		*/
+  char			data[ETH_DLEN];	/* frame data (variable)*/
 }  ethframe;
 
 #pragma pack(pop)

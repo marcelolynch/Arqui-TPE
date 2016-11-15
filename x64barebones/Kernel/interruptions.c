@@ -45,7 +45,8 @@ void ncPrint(char*s);
 
 
 void rtlInterrupt(){
-	rtl_interrupt();
+	rtlHandler();
+	//rtl_interrupt();
 }
 
 

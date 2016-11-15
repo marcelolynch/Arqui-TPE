@@ -9,8 +9,11 @@
 
 void fanorona();
 void shell();
-void getCommand();
-void processCommand();
+void chat();
+
+
+static void getCommand();
+static void processCommand();
 
 static char cmd_buffer[MAX_SIZE];
 
@@ -38,7 +41,8 @@ void shell(){
 	return;
 }
 
-void getCommand(){
+
+static void getCommand(){
 	int c;
 	int i = 0;
 	while((c = getchar()) != '\n'){
@@ -58,7 +62,7 @@ void getCommand(){
 }
 
 
-void processCommand(){
+static void processCommand(){
 	if(cmd_buffer[0] == 0){
 		putchar('\n');
 	}
@@ -71,8 +75,10 @@ void processCommand(){
 		sys_clrscrn();
 	} else if(strcmp("f", cmd_buffer) == 0){
 		fanorona();
+	}else if(strcmp(cmd_buffer, "chat") == 0){
+		chat();
 	}
-	else if(strcmp("exit", cmd_buffer)== 0){
+	else if(strcmp("exit", cmd_buffer) == 0){
 		run = 0;
 	}
 	else{
