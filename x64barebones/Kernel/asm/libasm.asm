@@ -23,7 +23,7 @@ irq8Handler:
 	irqHandler 8
 
 irq11Handler:
-	irqHandler 11
+	irqSlaveHandler 11
 
 sti:
 	sti
@@ -41,13 +41,11 @@ setPicMaster:
 	pop rbp
 	ret
 
-
 setPicSlave:
 	push    rbp
     mov     rbp, rsp
     mov     ax, di  ; en al esa la mascara
     out	    0A1h, al
-    out	    0A0h, al
     pop     rbp
     retn
 

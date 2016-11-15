@@ -32,6 +32,9 @@ void * _memalloc(uint64_t size);
 #define TSDSTATUS_OWN 	103
 
 
+static ethframe frame;
+
+
 static void* receiveBuffer;
 static uint8_t currentDescriptor;
 
@@ -122,6 +125,13 @@ void rtl_init(){
 // Once this is completed, then the card will start allowing packets in and/or out.
 
 	sysOutByte(IOADDR + 0x37, 0x0C); // Sets the RE and TE bits high
+
+	sysOutLong(TSAD0, (uint32_t)&frame);
+	sysOutLong(TSAD1, (uint32_t)&frame);
+	sysOutLong(TSAD2, (uint32_t)&frame);
+	sysOutLong(TSAD3, (uint32_t)&frame);
+
+	currentDescriptor = 0;
 	ncPrint("Init"); ncNewline();
 }
 
@@ -134,27 +144,38 @@ void rtlHandler(){
 	ncNewline();
 }
 
-
 static int count = 0;
 
 void rtl_interrupt(){
+	ncClear();
 	uint16_t isr = sysInWord(ISR);
+
 	sysOutWord(ISR, 0x0);
 	ncNewline();
 	ncPrint("Interrupting with ISR: "); ncPrintHex(isr);
 	ncPrint("  count: ");
 	ncPrintDec(count++);
+	ncNewline();
+
+	int i;	
+	uint8_t * buf = ((uint8_t*)receiveBuffer);
+	for(i = 0; i < 30 ; i++){
+		ncPrintHex(buf[i]);
+		ncPrint(" ");
+	}
+
 
     sysOutLong(IOADDR + 0x3E, 0x1); 
+  	sysOutByte(IOADDR + 0x37, 0x0C); // Sets the RE and TE bits high
+
 
 
     uint32_t tsd = sysInLong(TSD0 + currentDescriptor<<2);
     tsd &= ~(TSD_OWN); //Clear OWN bit
     sysOutLong(TSD0 + currentDescriptor<<2, tsd);
    	currentDescriptor = nextDesc(currentDescriptor);
+   	rtl_init();
 
-  	rtl_init();
-	setPIC();
 }
 
 
@@ -223,10 +244,9 @@ uint8_t CheckTSDStatus(uint8_t desc)
 
 
 
-static ethframe frame;
 
 void rtlSend(){
-	
+
 	uint8_t myMAC[6] = {0};
 	int i;
 	for(i=0; i < 6 ; i++){
@@ -241,7 +261,7 @@ void rtlSend(){
 	char * str = "CHELO QUE HACESSSSSSSSSSSSSs";
 	memcpy(frame.f_data, str, strlen(str));
 
-	sysOutLong(tsad, (uint32_t)&frame);
+	//sysOutLong(tsad, (uint32_t)&frame);
 
 	
 	ncPrint("Sending to desc: 0x");
@@ -252,11 +272,13 @@ void rtlSend(){
 
 
 	uint32_t descriptor = 6+6+2+strlen(str); //Bits 0-12: Size
-	descriptor &= ~(1 << 13); //Apago el bit 13
+	descriptor &= ~(TSD_OWN); //Apago el bit 13 TSD_OWN
 	descriptor &= ~(0x3f << 16);	// 21-16 threshold en 0
+	
+	while (!(sysInLong(tsd) & TSD_OWN))
+		;
 
 	sysOutLong(tsd, descriptor);
-
 }
 
 

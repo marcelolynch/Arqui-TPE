@@ -49,3 +49,21 @@
 
 	iretq
 %endmacro
+
+
+
+%macro irqSlaveHandler 1
+	pushaq
+
+	mov rdi, %1
+	call irqDispatcher
+	
+	mov al, 20h ; EOI
+
+	out 0A0h, al
+	out 20h, al
+	
+	popaq
+
+	iretq
+%endmacro

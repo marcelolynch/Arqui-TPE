@@ -90,16 +90,16 @@ void * initializeKernelBinary()
 	//while(1);
 	initialize_device(0,0x18);
 	findRTL();
-
+//	while(1);
 	rtl_init();
 	rtlPrintMac();
 	rtlSend();
-	int i = 100000000000;
+	int i = 500000000;
 	while(i--);
-	
-	initInterruptions();
 	rtlSend();
-
+	i = 500000000;
+	while(i--);
+	rtlSend();
 	while(1);
 
 	((EntryPoint)sampleCodeModuleAddress)();
