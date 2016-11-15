@@ -3,9 +3,6 @@
 // Varias funciones adaptadas de: https://github.com/AlgorithMan-de/wyoos/ (porteadas de C++)
 
 
-// ;Configuration Mechanism One has two IO port rages associated with it.
-// ;The address port (0xcf8-0xcfb) and the data port (0xcfc-0xcff).
-// ;A configuration cycle consists of writing to the address port to specify which device and register you want to access and then reading or writing the data to the data port.
 
 #define PCI_CONFIG_ADDRESS  0x0CF8
 #define PCI_CONFIG_DATA     0x0CFC
@@ -17,26 +14,44 @@
 #define MEMORY_MAPPING 0
 #define NULL 0
 
-// ;ddress dd 10000000000000000000000000000000b
-/* ;          /\     /\      /\   /\ /\    /\    */
-// ;        E    Res    Bus    Dev  F  Reg   0
-// ; Bits
-// ; 31        Enable bit = set to 1
-// ; 30 - 24   Reserved = set to 0
-// ; 23 - 16   Bus number = 256 options
-// ; 15 - 11   Device/Slot number = 32 options
-// ; 10 - 8    Function number = will leave at 0 (8 options)
-// ; 7 - 2     Register number = will leave at 0 (64 options) 64 x 4 bytes = 256 bytes worth of accessible registers
-// ; 1 - 0     Set to 0
-
-
-// ; =============================================================================
-// ; EOF
-
 #include <stdint.h>
 #include <naiveConsole.h>
 #include <port.h>
 #include <pci.h>
+
+
+// ;Configuration Mechanism One has two IO port rages associated with it.
+// ;The address port (0xcf8-0xcfb) and the data port (0xcfc-0xcff).
+// ;A configuration cycle consists of writing to the address port to specify which device and register 
+//you want to access and then reading or writing the data to the data port.
+
+//Escribir y leer de los puertos de control (ver pci.asm)
+void os_pci_write_reg(uint8_t bus, uint8_t func, uint16_t port, uint64_t data);
+uint32_t os_pci_read_reg(uint8_t bus, uint8_t func, uint16_t port);
+
+
+
+void dma_init(){
+  turn_on(0,0x18);
+}
+
+
+void turn_on(uint8_t bus, uint8_t device) {
+  uint32_t reg = os_pci_read_reg(bus,device,0x04);
+  reg |= (1<<2);
+  os_pci_write_reg(bus,device,0x04,reg);
+
+}
+
+
+
+
+
+
+// De aca para abajo hay funciones para consultar y explorar el PCI
+// Se usaron en la etapa de desarrollo 
+// para encontrar el RTL entre los dispositivos del PCI 
+// y consultar su IOADDR, no se usan en el kernel para nada
 
 typedef struct {
             uint32_t portBase;
@@ -177,21 +192,6 @@ BaseAddressRegister getBAR(uint8_t bus, uint8_t device, uint8_t function, uint16
 
     return result;
 }
-
-
-void os_pci_write_reg(uint8_t bus, uint8_t func, uint16_t port, uint64_t data);
-uint32_t os_pci_read_reg(uint8_t bus, uint8_t func, uint16_t port);
-
-
-
-
-void initialize_device(uint8_t bus, uint8_t dev_func) {
-  uint32_t value = os_pci_read_reg(bus,dev_func,0x04);
-  value |= 0x04;
-  os_pci_write_reg(bus,dev_func,0x04,value);
-
-}
-
 
 
  void checkDevice(uint8_t bus, uint8_t device) {

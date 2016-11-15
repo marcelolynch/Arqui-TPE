@@ -1,6 +1,6 @@
-#sudo tunctl -u $(whoami)
-#sudo tunctl -u $(whoami)
-#sudo tunctl -u $(whoami)
+# Esto se llama despues de tap.sh; ya deben estar levantadas las interfaces TAP0 TAP1 TAP2
+# Necesitan estar instalados: bridge-utils y uml-utilities
+
 sudo ip link set dev br2 down
 sudo brctl delbr br2
 sudo brctl addbr br2

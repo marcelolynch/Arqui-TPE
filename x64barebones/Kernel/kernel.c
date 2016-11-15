@@ -88,19 +88,15 @@ void * initializeKernelBinary()
 	//checkAllBuses(0, 1);
 	deviceDetails(0, 0x18);
 	//while(1);
-	initialize_device(0,0x18);
+
+	
+	//Inicializo la DMA y el RTL 
+	dma_init();
 	findRTL();
 	rtl_init();
+
 	rtlPrintMac();
-/*	rtlSend();
-	int i = 500000000;
-	while(i--);
-	rtlSend();
-	i = 500000000;
-	while(i--);
-	rtlSend();
-	while(1);
-*/
+
 	((EntryPoint)sampleCodeModuleAddress)();
 
 	return getStackBase();

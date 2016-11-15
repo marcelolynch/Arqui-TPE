@@ -60,8 +60,8 @@
 	
 	mov al, 20h ; EOI
 
-	out 0A0h, al
-	out 20h, al
+	out 0A0h, al ;EOI al PIC esclavo
+	out 20h, al  ;EOI al PIC primario
 	
 	popaq
 

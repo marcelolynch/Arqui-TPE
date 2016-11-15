@@ -51,7 +51,6 @@ os_pci_write_reg:
 	shl ebx, 16			; Move Bus to bits 23 - 16
 	shl ecx, 8			; Move Device/Function to bits 15 - 8
 	mov bx, cx
-	;shl edx, 2			; Move Register to bits 7 - 2
 	mov bl, dl
 	and ebx, 0x00ffffff		; Clear bits 31 - 24
 	or ebx, 0x80000000		; Set bit 31

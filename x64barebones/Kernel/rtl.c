@@ -27,12 +27,6 @@ void * _memalloc(uint64_t size);
 #define TSD_TOK (1 << 15)
 #define TSD_OWN (1 << 13)
 
-#define TSDSTATUS_0 	100
-#define TSDSTATUS_BOTH 	101
-#define TSDSTATUS_TOK	102
-#define TSDSTATUS_OWN 	103
-
-
 
 //Bitflags del ISR
 #define TRANSMIT_OK  	(1 << 2)
@@ -40,19 +34,24 @@ void * _memalloc(uint64_t size);
 #define ISR_ERROR		(1<<1 | 1<<3)
 
 
-#define RX_DATA_OFFSET (4 + 2*MAC_SIZE + 2) //Aca arranca la data posta en el frame ethernet 
-											//(antes 4 bytes de header + 2 macs + 2 de proto)
-
 #define BUF_SIZE 8*1024+16
 #define MAC_SIZE 6
+#define PROTO_SIZE 6
 #define MSG_BUF_SIZE 100
 #define MAX_MSG_SIZE 512
+
+
+#define RX_DATA_OFFSET (4 + ETH_HLEN) //Aca arranca la data posta en el frame ethernet 
+											//(antes 4 bytes de header + 2 macs + 2 de proto)
+
 
 #define TRUE 1
 #define FALSE 0
 
 
-
+/*
+	Este es el frame que se usa para 
+*/
 static struct {
 	ethframe frame;
 	uint32_t size;
@@ -62,15 +61,31 @@ static struct {
 
 static uint8_t receiveBuffer[BUF_SIZE] = {0};
 
-//Aca guardo los mensajes que van llegando antes de que me los pidan
+/*
+	Cada slot del buffer circular que guarda los mensajes recibidos
+	tiene esta forma.
+	
+	El campo present indica si el slot esta ocupado 
+	(si se guardo un mensaje y nunca se leyo) 
 
+	El campo broadcast indica si fue un mensaje broadcast
+*/
 typedef struct{
 	char present;
-	char broadcast;
-	char data[MAX_MSG_SIZE + 1];
-} msg;
+	struct{
+		char broadcast;
+		char data[MAX_MSG_SIZE + 1];
+	} msg;
+} msg_slot;
 
-static msg message_buffer[MSG_BUF_SIZE];
+
+
+/*
+	message_buffer guarda los mensajes y se implementa como
+	un buffer circular: current apunta al proximo indice a escribir
+	y pointer al proximo indice a leer. Si 
+*/
+static msg_slot message_buffer[MSG_BUF_SIZE];
 static int pointer = 0;
 static int current = 0;
 
@@ -188,83 +203,35 @@ void rtl_init(){
 }
 
 
-void rtlHandler(){
-	// Aca habria que mirar que el bit 15(TOK) del descriptor sea 1, que indica que la transmision
-	// de un packet fue exitosa, y hay que levantar la data que dejo en el receiveBuffer e imprimirla.
-	// No se donde encontrar el descriptor. Tambien habria que mirar como hacer para enviar datos
-/*	ncClear(); 
-	ncNewline();ncNewline();ncNewline();ncNewline();ncNewline();ncNewline();ncNewline();
-*/	int i;
-	uint16_t isr = sysInWord(ISR);
-//	ncPrint("ISR: "); ncPrintHex(isr); ncNewline();
-	if(isr & TRANSMIT_OK){ //Transmit OK
+
+/*
+	Handler de la interrupcion del RTL.
+	El dispositivo interrumpe cuando termino de transmitir bien 
+	con el bit TRANSMIT_OK en 1, y cuando termino de recibir con RECIEVE_OK en 1
 	
-	/*	ncPrint("Transmitted ");
-		ncPrintDec(transmission.size);
-		ncPrint(" bytes.");
-		ncNewline();
+	No estan activadas las interrupciones en caso de error, y en todo caso
+	no se haría nada.
 
-		ncPrint("Sent: ");
-		uint8_t * buf = ((uint8_t*)(&transmission.frame));
-		for(i = 0; i < 30 ; i++){
-			ncPrintHex(buf[i]);
-			ncPrint(" ");
-		}
-
-		ncNewline();
+	En caso de estar terminando una transmision no se hace nada,
+	si se recibio un paquete se llama a la rutina para guardar el mensaje
+	en el buffer de mensajes.
 */
+void rtlHandler(){
+	int i;
+	uint16_t isr = sysInWord(ISR);
+
+	if(isr & TRANSMIT_OK){ 
+		//Transmit OK - No hay que hacer nada
 	}
 
 	if(isr & RECIEVE_OK){
-/*		ncPrint("Just recieved a package. It starts like this:");
-
-		uint8_t * buf = ((uint8_t*)receiveBuffer);
-		for(i = 0; i < 30 ; i++){
-			ncPrintHex(buf[i]);
-			ncPrint(" ");
-		}
-
-		ncNewline();
-*/
 		rtl_save_msg(1, receiveBuffer + RX_DATA_OFFSET);
 	}
 
 	rtl_init(); //Reseteo el dispositivo porque si no no anda
 }
 
-static int count = 0;
 
-void rtl_interrupt(){
-	ncClear();
-	uint16_t isr = sysInWord(ISR);
-
-	sysOutWord(ISR, 0x0);
-	ncNewline();
-	ncPrint("Interrupting with ISR: "); ncPrintHex(isr);
-	ncPrint("  count: ");
-	ncPrintDec(count++);
-	ncNewline();
-
-	int i;	
-	uint8_t * buf = ((uint8_t*)receiveBuffer);
-	for(i = 0; i < 30 ; i++){
-		ncPrintHex(buf[i]);
-		ncPrint(" ");
-	}
-
-
-    sysOutLong(IOADDR + 0x3E, 0x1); 
-  	sysOutByte(IOADDR + 0x37, 0x0C); // Sets the RE and TE bits high
-
-
-
-    uint32_t tsd = sysInLong(TSD0 + currentDescriptor<<2);
-    tsd &= ~(TSD_OWN); //Clear OWN bit
-    sysOutLong(TSD0 + currentDescriptor*4, tsd);
-
-   	rtl_init(); //Sin esto no anda (!)
-
-}
 
 
 
@@ -274,7 +241,7 @@ void rtl_interrupt(){
 	llegando. Cada slot del buffer indica en el campo "present" si
 	esta ocupado o no (se desocupa cuando se pide con next_msg)
 
-	Si el buffer esta lleno no se hace nada
+	Si el buffer esta lleno no se hace nada.
 
 */
 static void rtl_save_msg(int is_broadcast, char * msg){	
@@ -283,11 +250,11 @@ static void rtl_save_msg(int is_broadcast, char * msg){
 	}
 
 	message_buffer[current].present = TRUE; //Ocupo el slot
-	message_buffer[current].broadcast = is_broadcast;
+	message_buffer[current].msg.broadcast = is_broadcast;
 
 	/*ncPrint("Saving msg: "); ncPrint(msg);
 	ncNewline();
-	*/strncpy(message_buffer[current].data, msg, MAX_MSG_SIZE);
+	*/strncpy(message_buffer[current].msg.data, msg, MAX_MSG_SIZE);
 
 	current++;
 	current = current % MSG_BUF_SIZE; //Volver al principio si se pasa
@@ -312,11 +279,11 @@ int rtl_next_msg(char* buf, int max_size){
 
 	max_size = max_size < MAX_MSG_SIZE ? max_size : MAX_MSG_SIZE; //Escribo como maximo min(max_size, MAX_MSG_SIZE)
 
-	char * next = message_buffer[pointer].data;
+	char * next = message_buffer[pointer].msg.data;
 	strncpy(buf, next, MAX_MSG_SIZE);
 
 	message_buffer[pointer].present = FALSE; //Apago ese slot, ya lo lei
-	is_broadcast = message_buffer[pointer].broadcast;
+	is_broadcast = message_buffer[pointer].msg.broadcast;
 	
 	pointer++;						//Avanzo en el buffer
 	pointer = pointer%MSG_BUF_SIZE;
@@ -326,7 +293,11 @@ int rtl_next_msg(char* buf, int max_size){
 };
 
 
-//Resetea el buffer de mensajes
+
+/*
+Resetea el buffer de mensajes 
+(vacia los slots y pone los punteros al principio)
+*/
 void rtl_clear_msgs(){
 	int i;
 	for(i=0; i< MAX_MSG_SIZE; i++){
@@ -338,6 +309,110 @@ void rtl_clear_msgs(){
 }
 
 
+
+
+
+
+/*
+	Envia un mensaje (null terminated) a la MAC que se envia como parametro
+	Se leen los primeros 6 bytes a partir de la mac destino. 
+
+	Se usa el frame de Ethernet II (https://en.wikipedia.org/wiki/Ethernet_frame#Ethernet_II)
+	Que tiene la estructura de ethframe en <ethernet.h>: 6 bytes de MAC destino, 6 bytes de
+	MAC origen, 2 bytes de protipo (se pone el dummy type), y el resto de los bytes con el cuerpo
+	del mensaje. 
+
+	Mas info del mecanismo en la programmers guide (http://www.cs.usfca.edu/~cruse/cs326f04/RTL8139_ProgrammersGuide.pdf)
+	y la data sheet para los registros (http://www.cs.usfca.edu/~cruse/cs326f04/RTL8139D_DataSheet.pdf)
+
+*/
+void rtl_send(char * msg, uint8_t * dst_mac){
+
+	int i;
+
+	//Broadcast
+	for(i=0; i < MAC_SIZE ; i++){
+		transmission.frame.hdr.dst[i] = '\xff';
+	}
+
+	uint32_t tsd = TSD0 + (currentDescriptor * 4);
+	uint32_t tsad = TSAD0 + (currentDescriptor * 4);
+
+
+	transmission.frame.hdr.proto = ETH_P_802_3; //Dummy type
+
+	memcpy(transmission.frame.data, msg, strlen(msg));
+
+
+	uint32_t descriptor = ETH_HLEN + strlen(msg); //Bits 0-12: Size
+	transmission.size = descriptor;	
+	descriptor &= ~(TSD_OWN); //Apago el bit 13 TSD_OWN
+	descriptor &= ~(0x3f << 16);	// 21-16 threshold en 0
+	
+	while (!(sysInLong(tsd) & TSD_OWN))
+		;
+
+	sysOutLong(tsd, descriptor);
+}
+
+
+
+
+
+
+//LO QUE SIGUE ES PARA DEBUG
+
+static int count = 0;
+void _debug_rtl_handler(){
+	ncClear();
+	uint16_t isr = sysInWord(ISR);
+
+	sysOutWord(ISR, 0x0);
+	ncNewline();
+	ncPrint("Interrupting with ISR: "); ncPrintHex(isr);
+	ncPrint("  count: ");
+	ncPrintDec(count++);
+	ncNewline();
+
+
+	ncClear(); 
+	ncNewline();ncNewline();ncNewline();ncNewline();ncNewline();ncNewline();ncNewline();
+	int i;
+	ncPrint("ISR: "); ncPrintHex(isr); ncNewline();
+	if(isr & TRANSMIT_OK){ //Transmit OK
+	
+		ncPrint("Transmitted ");
+		ncPrintDec(transmission.size);
+		ncPrint(" bytes.");
+		ncNewline();
+
+		ncPrint("Sent: ");
+		uint8_t * buf = ((uint8_t*)(&transmission.frame));
+		for(i = 0; i < 30 ; i++){
+			ncPrintHex(buf[i]);
+			ncPrint(" ");
+		}
+
+		ncNewline();
+
+	}
+
+	if(isr & RECIEVE_OK){
+		ncPrint("Just recieved a package. It starts like this:");
+
+		uint8_t * buf = ((uint8_t*)receiveBuffer);
+		for(i = 0; i < 30 ; i++){
+			ncPrintHex(buf[i]);
+			ncPrint(" ");
+		}
+
+		ncNewline();
+
+		rtl_save_msg(1, receiveBuffer + RX_DATA_OFFSET);
+	}
+
+	rtl_init(); //Reseteo el dispositivo porque si no no anda
+}
 
 
 void rtlPrintMac(){
@@ -355,84 +430,8 @@ void rtlPrintMac(){
 	ncPrintHex(sysInByte(IOADDR + 5));	
 }
 
-/*
-void memcpy(void * dst, void * src, uint32_t size){
-	while(size--){
-		char * dest = dst;
-		char * source = src;
-		*(dest++) = *(source++); 
-	}
-}*/
 
 
-
-uint8_t nextDesc(uint8_t current)
-{
- if(current == TX_SW_BUFFER_NUM-1){
-	return 0;
- }
- else
- 	return (1 + current);
-}
-
-
-
-
-uint8_t CheckTSDStatus(uint8_t desc)
-{
-	uint32_t Offset = desc << 2;
-
- uint32_t tmpTSD = sysInLong(IOADDR + TSD0 + Offset);
- switch ( tmpTSD & (TSD_OWN | TSD_TOK) )
- 	{
-	case (TSD_OWN | TSD_TOK): return TSDSTATUS_BOTH;
-	case (TSD_TOK) : return TSDSTATUS_TOK;
-	case (TSD_OWN) : return TSDSTATUS_OWN;
-	case 0 : return TSDSTATUS_0;
- 	}
- 
- return 0;
-}
-
-
-
-
-void rtl_send(char * msg, uint8_t * dst_mac){
-
-	//uint8_t myMAC[6] = {0};
-	int i;
-
-	//Broadcast
-	for(i=0; i < MAC_SIZE ; i++){
-		transmission.frame.hdr.dst[i] = '\xff';
-	}
-
-	uint32_t tsd = TSD0 + (currentDescriptor * 4);
-	uint32_t tsad = TSAD0 + (currentDescriptor * 4);
-
-
-	memcpy(transmission.frame.data, msg, strlen(msg));
-
-	//sysOutLong(tsad, (uint32_t)&frame);
-
-	/*
-	ncPrint("Sending to desc: 0x");
-	ncPrintHex(tsad);
-	ncPrint(" with TSD : 0x");
-	ncPrintHex(tsd);
-	ncNewline();
-*/
-
-	uint32_t descriptor = 6+6+2+strlen(msg); //Bits 0-12: Size
-	transmission.size = descriptor;	
-	descriptor &= ~(TSD_OWN); //Apago el bit 13 TSD_OWN
-	descriptor &= ~(0x3f << 16);	// 21-16 threshold en 0
-	
-	while (!(sysInLong(tsd) & TSD_OWN))
-		;
-
-	sysOutLong(tsd, descriptor);
-}
 
 
 void printDetails(char* msg){
