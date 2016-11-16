@@ -53,6 +53,7 @@ void * _memalloc(uint64_t size);
 
 
 static int checkMAC(uint8_t* dir);
+static int is_broadcast(uint8_t * frame);
 
 /*
 	Este es el frame que se usa para enviar 
@@ -240,8 +241,9 @@ void rtlHandler(){
 	if(isr & RECEIVE_OK){
 
 		if(checkMAC(receiveBuffer + RX_HEADER_SIZE))
-		{
-			rtl_save_msg(1, receiveBuffer);
+		{	
+			int broadcasting = is_broadcast(receiveBuffer + RX_HEADER_SIZE);
+			rtl_save_msg(broadcasting, receiveBuffer);
 		}
 	}
 
@@ -250,17 +252,18 @@ void rtlHandler(){
 
 
 
-static int checkMAC(uint8_t* frame){
-
-	int is_broadcast = 1;
+static int is_broadcast(uint8_t * frame){
 	for(int i = 0; i < MAC_SIZE ; i++){
-		ncPrintHex(frame[i]);
 		if(frame[i] != 0xff){
-			is_broadcast = 0;
+			return 0;
 		}
 	}
+	return 1;
+}
 
-	if(is_broadcast){
+
+static int checkMAC(uint8_t* frame){
+	if(is_broadcast(frame)){
 		return 1;
 	}
 
