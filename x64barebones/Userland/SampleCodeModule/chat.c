@@ -4,6 +4,7 @@
 #include "string.h"
 #include "syscalls.h"
 #define MAX_SIZE 512
+#define MAX_MSG_SIZE 1024
 
 static int processChatCommand(char * buf);
 static void getChatCommand();
@@ -71,15 +72,19 @@ static int processChatCommand(char * buf){
 	}	
 
 	else if(strcmp("r", cmd_buffer) == 0){
+		msg_desc msg_info;
 		int b;
-		if((b = sys_get_msg(buf, 1000)) == -1){
+		if((b = sys_get_msg(buf, &msg_info, MAX_MSG_SIZE)) == -1){
 			printf("\nNo new messages :(\n");
 		}else{
 			do{
 			printf("\n Nuevos mensajes:\n");
-			printf("%s message: %s \n", b?"Public":"private", buf);
+			printf("%s message from user %d: %s \n", 
+						msg_info.is_broadcast ? "Public" : "private", 
+						msg_info.user, 
+						buf);
 			
-			}while((b = sys_get_msg(buf, 1000)) != -1);
+			}while((b = sys_get_msg(buf, &msg_info, MAX_MSG_SIZE)) != -1);
 		}
 
 	}

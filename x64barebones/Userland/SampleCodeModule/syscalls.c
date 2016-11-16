@@ -10,7 +10,6 @@
 #define SYS_CLEAR_MSGS 9
 
 
-
 uint64_t _syscall(uint64_t code, uint64_t param1, uint64_t param2, uint64_t param3);
 
 //System call READ
@@ -39,9 +38,10 @@ uint64_t sys_send(char * msg){
 }
 
 //Syscall para recuperar el siguiente mensaje no leido de la cola
-//Devuelve -1 si no hay mensajes
-uint64_t sys_get_msg(char * buf, int max_size){
-	return _syscall(SYS_GET_MSG, (uint64_t)buf, max_size, 0);
+//Devuelve -1 si no hay mensajes, 0 si hay algo
+//Se escribe en msg_info
+uint64_t sys_get_msg(char * buf, msg_desc* msg_info, int max_size){
+	return _syscall(SYS_GET_MSG, (uint64_t)buf, msg_info, max_size);
 }
 
 

@@ -10,7 +10,7 @@ uint64_t _read(uint64_t fd, uint64_t str, uint64_t size);
 uint64_t _clrscrn(uint64_t dummy, uint64_t dummy2, uint64_t dummy3);
 uint64_t _memalloc(uint64_t size, uint64_t dummy2, uint64_t dummy3);
 uint64_t _send_msg(uint64_t msg, uint64_t dst, uint64_t dummy);
-uint64_t _get_msg(uint64_t buf, uint64_t max_size, uint64_t dummy);
+uint64_t _get_msg(uint64_t buf, uint64_t msg_info, uint64_t max_size);
 uint64_t _send_msg(uint64_t msg, uint64_t dst, uint64_t dummy);
 uint64_t _clear_msgs();
 
@@ -61,8 +61,8 @@ uint64_t _memalloc(uint64_t size, uint64_t dummy2, uint64_t dummy3){
 
 
 
-uint64_t _get_msg(uint64_t buf, uint64_t max_size, uint64_t dummy){
-	return rtl_next_msg((char*)buf, max_size);
+uint64_t _get_msg(uint64_t buf, uint64_t msg_info, uint64_t max_size){
+	return rtl_next_msg((char*)buf, (void*)msg_info ,max_size);
 }
 
 

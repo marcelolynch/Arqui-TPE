@@ -289,8 +289,15 @@ static void rtl_save_msg(int is_broadcast, char * frame){
 
 	Si no hay mensajes sin leer no se hace nada y se retorna -1.
 */
-int rtl_next_msg(char* buf, int max_size){
-	int is_broadcast;
+
+typedef struct{
+	int broadcast;
+	int user;
+} msg_info;
+
+int rtl_next_msg(char* buf, void * info, int max_size){
+
+
 
 	if(message_buffer[pointer].present == FALSE){
 		return -1; //No hay nada todavia
@@ -302,12 +309,15 @@ int rtl_next_msg(char* buf, int max_size){
 	strncpy(buf, next, MAX_MSG_SIZE);
 
 	message_buffer[pointer].present = FALSE; //Apago ese slot, ya lo lei
-	is_broadcast = message_buffer[pointer].msg.broadcast;
 	
+
+	((msg_info*)info)->broadcast = message_buffer[pointer].msg.broadcast;
+	((msg_info*)info)->user = message_buffer[pointer].msg.user;
+
 	pointer++;						//Avanzo en el buffer
 	pointer = pointer%MSG_BUF_SIZE;
 
-	return is_broadcast;
+	return 0;
 	
 };
 
