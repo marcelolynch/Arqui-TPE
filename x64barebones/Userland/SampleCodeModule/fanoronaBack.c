@@ -582,11 +582,9 @@ static tCasilla ** generarMatrizTablero(int fils, int cols){
 	{	
 	
 		matriz[i] = malloc(cols*sizeof(tCasilla));
-		printf("\nMatriz %x \n\n", matriz[i]);
 		
 		void * ptr = malloc(cols*sizeof(tCasilla));
 		matriz[i] = (tCasilla*)ptr;
-		printf("\nMatriz %x \n\n", matriz[i]);
 
 		if(matriz[i] == NULL){
 			liberarTodo(matriz, i);

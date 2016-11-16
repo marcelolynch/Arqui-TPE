@@ -244,10 +244,7 @@ int jugar(tPartida partida){
 			}
 
 			else if (jugada == QUIT) {
-				printf("Desea guardar su juego antes de salir?\n");
-				quiereGuardar = leerSN();
-				if (quiereGuardar)
-					pedirNombre(nombre);
+				quiereGuardar = 0;
 			}
 
 			if (jugada == SAVE || quiereGuardar) {
@@ -394,6 +391,8 @@ void pedirNombre (char nombre[]) {
 	int n;
 	tFlag esValido = 1;
 
+	char c = nombre[0];
+
 	printf("Escriba el nombre con el que quiere guardar su juego. (Max %d caracteres)\n", MAX_NOM);
 
 	do {
@@ -521,7 +520,7 @@ tCaptura validarFmtCaptura (const char str[]) {
 }
 
 int validarFmtNombre(char destino[], const char origen[], int longOrigen) {
-	const char *nuevoNombre;
+	char *nuevoNombre;
 	int cantEspacios;
 	int longNombre;
 

@@ -30,7 +30,7 @@ void * _memalloc(uint64_t size);
 
 //Bitflags del ISR
 #define TRANSMIT_OK  	(1 << 2)
-#define RECIEVE_OK 		1
+#define RECEIVE_OK 		1
 #define ISR_ERROR		(1<<1 | 1<<3)
 
 
@@ -40,13 +40,20 @@ void * _memalloc(uint64_t size);
 #define MSG_BUF_SIZE 100
 #define MAX_MSG_SIZE 512
 
+#define NETWORK_MAC "\xDE\xAD\xC0\xFF\xEE"
 
-#define RX_DATA_OFFSET (4 + ETH_HLEN) //Aca arranca la data posta en el frame ethernet 
+
+#define RX_HEADER_SIZE 4
+#define RX_DATA_OFFSET (RX_HEADER_SIZE + ETH_HLEN) //Aca arranca la data posta en el frame ethernet 
 											//(antes 4 bytes de header + 2 macs + 2 de proto)
+#define USER_BYTE_OFFSET (RX_HEADER_SIZE + MAC_SIZE + MAC_SIZE - 1) //Ultimo byte de la MAC de origen
 
 
 #define TRUE 1
 #define FALSE 0
+
+
+static int checkMAC(uint8_t* dir);
 
 
 /*
@@ -69,11 +76,13 @@ static uint8_t receiveBuffer[BUF_SIZE] = {0};
 	(si se guardo un mensaje y nunca se leyo) 
 
 	El campo broadcast indica si fue un mensaje broadcast
+	y user el numero de usuario (ultimo byte de la MAC de origen)
 */
 typedef struct{
 	char present;
 	struct{
 		char broadcast;
+		char user;
 		char data[MAX_MSG_SIZE + 1];
 	} msg;
 } msg_slot;
@@ -207,7 +216,7 @@ void rtl_init(){
 /*
 	Handler de la interrupcion del RTL.
 	El dispositivo interrumpe cuando termino de transmitir bien 
-	con el bit TRANSMIT_OK en 1, y cuando termino de recibir con RECIEVE_OK en 1
+	con el bit TRANSMIT_OK en 1, y cuando termino de recibir con RECEIVE_OK en 1
 	
 	No estan activadas las interrupciones en caso de error, y en todo caso
 	no se haría nada.
@@ -224,24 +233,18 @@ void rtlHandler(){
 		//Transmit OK - No hay que hacer nada
 	}
 
-	if(isr & RECIEVE_OK){
+	if(isr & RECEIVE_OK){
 
-		if(checkMAC(recieveBuffer + 4 + MAC_SIZE))
-		{	ncPrint("Yes")
-			ncNewline();
+		if(checkMAC(receiveBuffer + RX_HEADER_SIZE + MAC_SIZE))
+		{
+			rtl_save_msg(1, receiveBuffer);
 		}
-		else{
-			ncPrint("No")
-			ncNewline();
-		}
-		rtl_save_msg(1, receiveBuffer + RX_DATA_OFFSET);
 	}
 
 	rtl_init(); //Reseteo el dispositivo porque si no no anda
 }
 
 
-#define NETWORK_MAC "\xDE\xAD\xC0\xFF\xEE"
 static int checkMAC(uint8_t* dir){
 	return strncmp(NETWORK_MAC, dir, 5) == 0;
 }
@@ -259,17 +262,18 @@ static int checkMAC(uint8_t* dir){
 	Si el buffer esta lleno no se hace nada.
 
 */
-static void rtl_save_msg(int is_broadcast, char * msg){	
+static void rtl_save_msg(int is_broadcast, char * frame){	
 	if(message_buffer[current].present == TRUE){
 		return; //Buffer lleno
 	}
 
 	message_buffer[current].present = TRUE; //Ocupo el slot
 	message_buffer[current].msg.broadcast = is_broadcast;
+	message_buffer[current].msg.user = frame[USER_BYTE_OFFSET];
 
 	/*ncPrint("Saving msg: "); ncPrint(msg);
 	ncNewline();
-	*/strncpy(message_buffer[current].msg.data, msg, MAX_MSG_SIZE);
+	*/strncpy(message_buffer[current].msg.data, frame + RX_DATA_OFFSET, MAX_MSG_SIZE);
 
 	current++;
 	current = current % MSG_BUF_SIZE; //Volver al principio si se pasa
@@ -412,7 +416,7 @@ void _debug_rtl_handler(){
 
 	}
 
-	if(isr & RECIEVE_OK){
+	if(isr & RECEIVE_OK){
 		ncPrint("Just recieved a package. It starts like this:");
 
 		uint8_t * buf = ((uint8_t*)receiveBuffer);
