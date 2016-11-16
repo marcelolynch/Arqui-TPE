@@ -133,9 +133,9 @@ int decode_send(int * user, int * offset){
 		if(!isdigit(*c))
 			return 0; //Mal formado
  		*user = (*user)*10 + (*c - '0');
- 		*offset++;
+ 		(*offset)++;
  		c++;
 	}
-	*offset++; //El espacio
+	(*offset)++; //El espacio
 	return 1;
 }
