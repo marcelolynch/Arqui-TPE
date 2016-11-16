@@ -3,7 +3,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "syscalls.h"
-#define MAX_SIZE 512
+#define MAX_SIZE 1024
 #define MAX_MSG_SIZE 1024
 
 static int processChatCommand(char * buf);
@@ -67,8 +67,18 @@ static int processChatCommand(char * buf){
 		printf("CHAT!\n \t 'r' para recibir nuevos mensajes \n\t 'send <tu mensaje>' para mandar un mensaje publico\n");
 	}
 
-	else if(starts_with(cmd_buffer, "send ")){
-		sys_send(cmd_buffer + 5, 2);
+	else if(starts_with(cmd_buffer, "s ")){
+		char msg[MAX_MSG_SIZE];
+		int user;
+		int i = scanf("s %d %s", cmd_buffer, &user, msg);
+		if(i == 1){
+			printf("Sending to user: %d\n", user);
+		}
+		sys_send(msg, user);
+	}	
+
+	else if(starts_with(cmd_buffer, "b ")){
+		sys_broadcast(cmd_buffer + 2);
 	}	
 
 	else if(strcmp("r", cmd_buffer) == 0){
