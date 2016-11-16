@@ -225,10 +225,25 @@ void rtlHandler(){
 	}
 
 	if(isr & RECIEVE_OK){
+
+		if(checkMAC(recieveBuffer + 4 + MAC_SIZE))
+		{	ncPrint("Yes")
+			ncNewline();
+		}
+		else{
+			ncPrint("No")
+			ncNewline();
+		}
 		rtl_save_msg(1, receiveBuffer + RX_DATA_OFFSET);
 	}
 
 	rtl_init(); //Reseteo el dispositivo porque si no no anda
+}
+
+
+#define NETWORK_MAC "\xDE\xAD\xC0\xFF\xEE"
+static int checkMAC(uint8_t* dir){
+	return strncmp(NETWORK_MAC, dir, 5) == 0;
 }
 
 
