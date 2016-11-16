@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "video_driver.h"
 #include "keyboard_driver.h"
+#include <rtl.h>
 
 typedef uint64_t (* syscall_ptr)(uint64_t p, uint64_t q, uint64_t r);
 
@@ -12,6 +13,7 @@ uint64_t _memalloc(uint64_t size, uint64_t dummy2, uint64_t dummy3);
 uint64_t _send_msg(uint64_t msg, uint64_t dst, uint64_t dummy);
 uint64_t _get_msg(uint64_t buf, uint64_t msg_info, uint64_t max_size);
 uint64_t _send_msg(uint64_t msg, uint64_t dst, uint64_t dummy);
+uint64_t _send_broadcast(uint64_t msg, uint64_t dummy1, uint64_t dummy2);
 uint64_t _clear_msgs();
 
 syscall_ptr sysCalls[] = {
@@ -21,8 +23,9 @@ syscall_ptr sysCalls[] = {
 	_clrscrn, //Syscall 5
 	_memalloc, //syscall 6
 	_send_msg, //syscall 7
-	_get_msg, //syscall 8
-	_clear_msgs  //syscall 9
+	_send_broadcast, //syscall 8
+	_get_msg, //syscall 9
+	_clear_msgs  //syscall 10
 };
 
 
@@ -67,9 +70,15 @@ uint64_t _get_msg(uint64_t buf, uint64_t msg_info, uint64_t max_size){
 
 
 uint64_t _send_msg(uint64_t msg, uint64_t dst, uint64_t dummy){
-	rtl_send((char*)msg, (uint8_t*)dst);
+	rtl_send((char*)msg, (uint8_t)dst);
 	return 0;
 }
+
+uint64_t _send_broadcast(uint64_t msg, uint64_t dummy1, uint64_t dummy2){
+	rtl_send((char*)msg, -1);
+	return 0;
+}
+
 
 uint64_t _clear_msgs(uint64_t dummy1, uint64_t dummy2, uint64_t dummy3){
 	rtl_clear_msgs();

@@ -6,8 +6,9 @@
 #define SYS_CLRSCRN 5
 #define SYS_MEMALLOC 6
 #define SYS_SEND_MSG 7
-#define SYS_GET_MSG 8
-#define SYS_CLEAR_MSGS 9
+#define SYS_SEND_BROADCAST 8
+#define SYS_GET_MSG 9
+#define SYS_CLEAR_MSGS 10
 
 
 uint64_t _syscall(uint64_t code, uint64_t param1, uint64_t param2, uint64_t param3);
@@ -33,15 +34,19 @@ uint64_t sys_memalloc(uint64_t bytes){
 }
 
 // System call para enviar un mensaje a la red
-uint64_t sys_send(char * msg){
-	return _syscall(SYS_SEND_MSG, (uint64_t)msg, 0, 0);
+uint64_t sys_send(char * msg, char user){
+	return _syscall(SYS_SEND_MSG, (uint64_t)msg, user, 0);
+}
+
+uint64_t sys_broadcast(char * msg){
+	return _syscall(SYS_SEND_BROADCAST, (uint64_t)msg, 0, 0);
 }
 
 //Syscall para recuperar el siguiente mensaje no leido de la cola
 //Devuelve -1 si no hay mensajes, 0 si hay algo
 //Se escribe en msg_info
 uint64_t sys_get_msg(char * buf, msg_desc* msg_info, int max_size){
-	return _syscall(SYS_GET_MSG, (uint64_t)buf, msg_info, max_size);
+	return _syscall(SYS_GET_MSG, (uint64_t)buf, (uint64_t)msg_info, max_size);
 }
 
 

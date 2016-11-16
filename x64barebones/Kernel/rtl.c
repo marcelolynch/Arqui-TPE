@@ -40,7 +40,6 @@ void * _memalloc(uint64_t size);
 #define MSG_BUF_SIZE 100
 #define MAX_MSG_SIZE 512
 
-#define NETWORK_MAC "\xDE\xAD\xC0\xFF\xEE"
 
 
 #define RX_HEADER_SIZE 4
@@ -55,14 +54,18 @@ void * _memalloc(uint64_t size);
 
 static int checkMAC(uint8_t* dir);
 
-
 /*
-	Este es el frame que se usa para 
+	Este es el frame que se usa para enviar 
 */
 static struct {
 	ethframe frame;
 	uint32_t size;
 } transmission;
+
+
+//Aca voy a guardar mi direccion MAC
+static uint8_t myMAC[6];
+
 
 
 
@@ -201,10 +204,11 @@ void rtl_init(){
 	sysOutLong(TSAD3, (uint32_t)&transmission.frame);
 
 	//Seteo la MAC en el header del ethernet frame que vamos a usar
+	//Y lo guardo en el vector de informacion
 	int i;
 	for(i=0; i < MAC_SIZE ; i++){
 		transmission.frame.hdr.src[i] = sysInByte(IOADDR + i);
-		
+		myMAC[i] = sysInByte(IOADDR + i);
 	}
 
 
@@ -245,8 +249,13 @@ void rtlHandler(){
 }
 
 
-static int checkMAC(uint8_t* dir){
-	return strncmp(NETWORK_MAC, dir, 5) == 0;
+
+static int checkMAC(uint8_t* frame){
+	for(int i = 0; i < MAC_SIZE ; i++){
+		if(frame[i] != myMAC[i])
+			return 0;
+	}
+	return 1;
 }
 
 
@@ -355,13 +364,23 @@ void rtl_clear_msgs(){
 	y la data sheet para los registros (http://www.cs.usfca.edu/~cruse/cs326f04/RTL8139D_DataSheet.pdf)
 
 */
-void rtl_send(char * msg, uint8_t * dst_mac){
+void rtl_send(char * msg, uint8_t dst){
 
 	int i;
 
+	if(dst < 0){ 
 	//Broadcast
 	for(i=0; i < MAC_SIZE ; i++){
 		transmission.frame.hdr.dst[i] = '\xff';
+	}
+	} else {
+		//Mensaje privado
+		transmission.frame.hdr.dst[0] = '\xDE';
+		transmission.frame.hdr.dst[1] = '\xAD';
+		transmission.frame.hdr.dst[2] = '\xC0';
+		transmission.frame.hdr.dst[3] = '\xFF';
+		transmission.frame.hdr.dst[4] = '\xEE';
+		transmission.frame.hdr.dst[5] = dst;
 	}
 
 	uint32_t tsd = TSD0 + (currentDescriptor * 4);

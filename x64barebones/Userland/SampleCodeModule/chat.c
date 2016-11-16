@@ -68,7 +68,7 @@ static int processChatCommand(char * buf){
 	}
 
 	else if(starts_with(cmd_buffer, "send ")){
-		sys_send(cmd_buffer + 5);
+		sys_send(cmd_buffer + 5, 2);
 	}	
 
 	else if(strcmp("r", cmd_buffer) == 0){
