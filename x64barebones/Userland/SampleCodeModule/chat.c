@@ -2,9 +2,14 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
+#include "ctype.h"
 #include "syscalls.h"
 #define MAX_SIZE 1024
 #define MAX_MSG_SIZE 1024
+
+#define SEND_CMD_OFFSET 2
+#define BCAST_CMD_OFFSET 2
+
 
 static int processChatCommand(char * buf);
 static void getChatCommand();
@@ -18,7 +23,10 @@ void chat(){
 	int active = 1;
 	sys_clrscrn();
 	sys_clear_msgs();
-	printf("   Bienvenido a este humilde chat!\n \t 'r' para recibir nuevos mensajes \n\t 'send <tu mensaje>' para mandar un mensaje publico\n");
+	printf("   Bienvenido a este humilde chat!\n");
+	printf("\t'r' para recibir nuevos mensajes \n");
+	printf("\t's <id> <tu mensaje>' para mandarle un mensaje al usuario <id>\n\t(el id debe ser un numero entre 0 y 255)\n");
+	printf("\t'b <tu mensaje>' para mandar un mensaje publico\n");
 	while(active){
 		putchar('\n');
 		putchar('>');
@@ -69,17 +77,23 @@ static int processChatCommand(char * buf){
 
 	else if(starts_with(cmd_buffer, "s ")){
 		int user;
-		printf("\nSend to: ");
-		int i = scanf("%d", &user);
+		int digits_offset;
 		putchar('\n');
-		if(i == 1){
-			printf("Sending to user: %d\n", user);		
-		sys_send(cmd_buffer + 2, user);
+		if(decode_send(&user, &digits_offset)){
+			if(user > 0xFF){
+				printf("Invalid user (0-255)\n");
+			}else{
+				printf("Message sent to user: %d\n", user);		
+				sys_send(cmd_buffer + SEND_CMD_OFFSET + digits_offset, user);
+			}
+		}
+		else{
+			printf("\nInvalid command\n");
 		}
 	}	
 
 	else if(starts_with(cmd_buffer, "b ")){
-		sys_broadcast(cmd_buffer + 2);
+		sys_broadcast(cmd_buffer + BCAST_CMD_OFFSET);
 	}	
 
 	else if(strcmp("r", cmd_buffer) == 0){
@@ -91,7 +105,7 @@ static int processChatCommand(char * buf){
 			do{
 			printf("\n Nuevos mensajes:\n");
 			printf("%s message from user %d: %s \n", 
-						msg_info.is_broadcast ? "Public" : "private", 
+						msg_info.is_broadcast ? "Public" : "Private", 
 						msg_info.user, 
 						buf);
 			
@@ -106,5 +120,22 @@ static int processChatCommand(char * buf){
 	else{
 		printf("\nInvalid command \n");
 	}
+	return 1;
+}
+
+
+int decode_send(int * user, int * offset){
+	*user = 0;
+	*offset = 0;
+
+	char * c = cmd_buffer + SEND_CMD_OFFSET;
+	while(*c != ' '){
+		if(!isdigit(*c))
+			return 0; //Mal formado
+ 		*user = (*user)*10 + (*c - '0');
+ 		*offset++;
+ 		c++;
+	}
+	*offset++; //El espacio
 	return 1;
 }
