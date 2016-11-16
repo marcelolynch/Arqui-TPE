@@ -239,7 +239,7 @@ void rtlHandler(){
 
 	if(isr & RECEIVE_OK){
 
-		if(checkMAC(receiveBuffer + RX_HEADER_SIZE + MAC_SIZE))
+		if(checkMAC(receiveBuffer + RX_HEADER_SIZE))
 		{
 			rtl_save_msg(1, receiveBuffer);
 		}
@@ -251,6 +251,19 @@ void rtlHandler(){
 
 
 static int checkMAC(uint8_t* frame){
+
+	int is_broadcast = 1;
+	for(int i = 0; i < MAC_SIZE ; i++){
+		ncPrintHex(frame[i]);
+		if(frame[i] != 0xff){
+			is_broadcast = 0;
+		}
+	}
+
+	if(is_broadcast){
+		return 1;
+	}
+
 	for(int i = 0; i < MAC_SIZE ; i++){
 		if(frame[i] != myMAC[i])
 			return 0;
@@ -305,8 +318,6 @@ typedef struct{
 } msg_info;
 
 int rtl_next_msg(char* buf, void * info, int max_size){
-
-
 
 	if(message_buffer[pointer].present == FALSE){
 		return -1; //No hay nada todavia
@@ -364,7 +375,7 @@ void rtl_clear_msgs(){
 	y la data sheet para los registros (http://www.cs.usfca.edu/~cruse/cs326f04/RTL8139D_DataSheet.pdf)
 
 */
-void rtl_send(char * msg, uint8_t dst){
+void rtl_send(char * msg, int dst){
 
 	int i;
 

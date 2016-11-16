@@ -68,13 +68,14 @@ static int processChatCommand(char * buf){
 	}
 
 	else if(starts_with(cmd_buffer, "s ")){
-		char msg[MAX_MSG_SIZE];
 		int user;
-		int i = scanf("s %d %s", cmd_buffer, &user, msg);
+		printf("\nSend to: ");
+		int i = scanf("%d", &user);
+		putchar('\n');
 		if(i == 1){
-			printf("Sending to user: %d\n", user);
+			printf("Sending to user: %d\n", user);		
+		sys_send(cmd_buffer + 2, user);
 		}
-		sys_send(msg, user);
 	}	
 
 	else if(starts_with(cmd_buffer, "b ")){
