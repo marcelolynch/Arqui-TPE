@@ -40,6 +40,7 @@ void chat(){
 	}
 
 	sys_disconnect();
+	sys_clrscrn();
 
 }
 
@@ -80,12 +81,6 @@ static void getChatCommand(){
 
 static int processChatCommand(char * buf){
 	if(cmd_buffer[0] == 0){
-		putchar('\n');
-	}
-	
-	else if(starts_with(cmd_buffer, "echo ")){
-		putchar('\n');
-		puts(cmd_buffer + 5);
 		putchar('\n');
 	}
 	
@@ -148,7 +143,6 @@ static int processChatCommand(char * buf){
 	}
 
 	else if(strcmp("exit", cmd_buffer) == 0){
-	
 		return 0;
 	
 	} 
