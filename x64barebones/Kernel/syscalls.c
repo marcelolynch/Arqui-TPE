@@ -14,7 +14,11 @@ uint64_t _send_msg(uint64_t msg, uint64_t dst, uint64_t dummy);
 uint64_t _get_msg(uint64_t buf, uint64_t msg_info, uint64_t max_size);
 uint64_t _send_msg(uint64_t msg, uint64_t dst, uint64_t dummy);
 uint64_t _send_broadcast(uint64_t msg, uint64_t dummy1, uint64_t dummy2);
-uint64_t _clear_msgs();
+uint64_t _clear_msgs(uint64_t dummy1, uint64_t dummy2, uint64_t dummy3);
+uint64_t _connect(uint64_t dummy1, uint64_t dummy2, uint64_t dummy3);
+uint64_t _disconnect(uint64_t dummy1, uint64_t dummy2, uint64_t dummy3);
+uint64_t _get_active_users(uint64_t vec, uint64_t dummy1, uint64_t dummy2);
+
 
 syscall_ptr sysCalls[] = {
 	0, 0, 0,
@@ -25,7 +29,10 @@ syscall_ptr sysCalls[] = {
 	_send_msg, //syscall 7
 	_send_broadcast, //syscall 8
 	_get_msg, //syscall 9
-	_clear_msgs  //syscall 10
+	_clear_msgs,  //syscall 10
+	_connect,	//syscall 11
+	_disconnect, //syscall 12
+	_get_active_users //syscall 13
 };
 
 
@@ -83,4 +90,18 @@ uint64_t _send_broadcast(uint64_t msg, uint64_t dummy1, uint64_t dummy2){
 uint64_t _clear_msgs(uint64_t dummy1, uint64_t dummy2, uint64_t dummy3){
 	rtl_clear_msgs();
 	return 0;
+}
+
+uint64_t _connect(uint64_t dummy1, uint64_t dummy2, uint64_t dummy3){
+	rtl_notify_connection(1);
+	return 0;
+}
+
+uint64_t _disconnect(uint64_t dummy1, uint64_t dummy2, uint64_t dummy3){
+	rtl_notify_connection(0);
+	return 0;
+}
+
+uint64_t _get_active_users(uint64_t vec, uint64_t dummy1, uint64_t dummy2){
+	return rtl_get_active_users((int*)vec);
 }

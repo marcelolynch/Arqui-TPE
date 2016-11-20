@@ -17,22 +17,28 @@ static void getChatCommand();
 
 static char cmd_buffer[MAX_SIZE];
 
+static int connected_users[255];
 
 void chat(){
 	char buffer[1000];
 	int active = 1;
 	sys_clrscrn();
 	sys_clear_msgs();
+	sys_connect();
+
 	printf("   Bienvenido a este humilde chat!\n");
 	printf("\t'r' para recibir nuevos mensajes \n");
 	printf("\t's <id> <tu mensaje>' para mandarle un mensaje al usuario <id>\n\t(el id debe ser un numero entre 0 y 255)\n");
 	printf("\t'b <tu mensaje>' para mandar un mensaje publico\n");
+	printf("\t'users' para ver los usuarios conectados\n");
 	while(active){
 		putchar('\n');
 		putchar('>');
 		getChatCommand();
 		active = processChatCommand(buffer);
 	}
+
+	sys_disconnect();
 
 }
 
@@ -81,14 +87,28 @@ static int processChatCommand(char * buf){
 		putchar('\n');
 		if(decode_send(&user, &digits_offset)){
 			if(user > 0xFF){
-				printf("Invalid user (0-255)\n");
+				printf("No existe ese usuario (los usuarios van de 0 a 255)\n");
 			}else{
-				printf("Message sent to user: %d\n", user);		
-				sys_send(cmd_buffer + SEND_CMD_OFFSET + digits_offset, user);
+				int i;
+				int active = 0; 
+				int count = sys_get_active_users(connected_users);
+				
+				for(i = 0; i < count ; i++){
+					if(user == connected_users[i]){
+						//El usuario esta efectivamente conectado
+						active = 1;
+					}
+				}
+				if(active){
+					printf("Se envio su mensaje al usuario #%d\n", user);
+					sys_send(cmd_buffer + SEND_CMD_OFFSET + digits_offset, user);
+				}else{
+					printf("El usuario #%d no esta conectado\n", user);
+				}
 			}
 		}
 		else{
-			printf("\nInvalid command\n");
+			printf("\nComando invalido\n");
 		}
 	}	
 
@@ -104,8 +124,8 @@ static int processChatCommand(char * buf){
 		}else{
 			do{
 			printf("\n Nuevos mensajes:\n");
-			printf("%s message from user %d: %s \n", 
-						msg_info.is_broadcast ? "Public" : "Private", 
+			printf("[Mensaje %s del usuario #%d]  %s \n", 
+						msg_info.is_broadcast ? "publico" : "privado", 
 						msg_info.user, 
 						buf);
 			
@@ -115,10 +135,21 @@ static int processChatCommand(char * buf){
 	}
 
 	else if(strcmp("exit", cmd_buffer) == 0){
+	
 		return 0;
+	
+	} 
+	else if(strcmp("users", cmd_buffer) == 0){
+		printf("\nUsuarios conectados: \n");
+		int i;
+		int count = sys_get_active_users(connected_users);
+		for(i = 0; i < count; i++){
+			printf("Usuario #%d\n", connected_users[i]);
+		}
+
 	}
 	else{
-		printf("\nInvalid command \n");
+		printf("\nComando invalido\n");
 	}
 	return 1;
 }

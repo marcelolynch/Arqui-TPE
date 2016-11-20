@@ -9,6 +9,9 @@
 #define SYS_SEND_BROADCAST 8
 #define SYS_GET_MSG 9
 #define SYS_CLEAR_MSGS 10
+#define SYS_CONNECT 11
+#define SYS_DISCONNECT 12
+#define SYS_GET_ACTIVE_USERS 13
 
 
 uint64_t _syscall(uint64_t code, uint64_t param1, uint64_t param2, uint64_t param3);
@@ -54,3 +57,20 @@ uint64_t sys_get_msg(char * buf, msg_desc* msg_info, int max_size){
 uint64_t sys_clear_msgs(){
 	return _syscall(SYS_CLEAR_MSGS, 0, 0, 0);
 }
+
+//Se conecta a la red (expone el usuario al resto de la red)
+uint64_t sys_connect(){
+	return _syscall(SYS_CONNECT, 0, 0, 0);
+}
+
+//Se desconecta de la red (esconde el usuario del resto de la red)
+uint64_t sys_disconnect(){
+	return _syscall(SYS_DISCONNECT, 0, 0, 0);
+}
+
+//Llena vec con los numeros de los usuarios activos (max 255). 
+//Devuelve la cantidad que se escribio
+uint64_t sys_get_active_users(int * vec){
+	return _syscall(SYS_GET_ACTIVE_USERS, (uint64_t)vec, 0, 0);
+}
+

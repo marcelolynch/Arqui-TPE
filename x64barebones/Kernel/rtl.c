@@ -40,7 +40,7 @@ void * _memalloc(uint64_t size);
 #define MSG_BUF_SIZE 100
 #define MAX_MSG_SIZE 512
 
-
+#define MAX_USERS 0xff
 
 #define RX_HEADER_SIZE 4
 #define RX_DATA_OFFSET (RX_HEADER_SIZE + ETH_HLEN) //Aca arranca la data posta en el frame ethernet 
@@ -68,6 +68,8 @@ static struct {
 static uint8_t myMAC[6];
 
 
+static int connected_users[MAX_USERS] = {0};
+static int am_i_connected = 0;
 
 
 static uint8_t receiveBuffer[BUF_SIZE] = {0};
@@ -107,6 +109,8 @@ static uint8_t currentDescriptor;
 
 
 static void rtl_save_msg(int is_broadcast, char * msg);
+static int is_disconnect(uint8_t * frame);
+static int is_connect(uint8_t * frame);
 
 
 void rtl_init(){
@@ -239,11 +243,32 @@ void rtlHandler(){
 	}
 
 	if(isr & RECEIVE_OK){
-
-		if(checkMAC(receiveBuffer + RX_HEADER_SIZE))
+		uint8_t * frame = receiveBuffer + RX_HEADER_SIZE;
+		if(checkMAC(frame))
 		{	
-			int broadcasting = is_broadcast(receiveBuffer + RX_HEADER_SIZE);
-			rtl_save_msg(broadcasting, receiveBuffer);
+			if(!is_connect(frame) && !is_disconnect(frame)){
+				int broadcasting = is_broadcast(frame);
+				rtl_save_msg(broadcasting, receiveBuffer);
+			}
+			else if(is_connect(frame)){
+				uint8_t userID = *(receiveBuffer + USER_BYTE_OFFSET);
+	
+				if(!connected_users[userID]){
+					//Solo lo registro si no estaba conectado antes
+					//Puede ser que me llegue varias veces por lo que viene abajo
+					connected_users[userID] = 1;
+					
+					//Si estoy conectado tengo que mandar notificacion
+					//Para que el nuevo que se conecto sepa
+					if(am_i_connected){
+						rtl_notify_connection(1);
+					}
+				}
+
+			}else{
+				uint8_t userID = *(receiveBuffer + USER_BYTE_OFFSET);
+				connected_users[userID] = 0;
+			}
 		}
 	}
 
@@ -252,6 +277,7 @@ void rtlHandler(){
 
 
 
+//Si la MAC coincide con FF:FF:FF:FF es un mensaje broadcast
 static int is_broadcast(uint8_t * frame){
 	for(int i = 0; i < MAC_SIZE ; i++){
 		if(frame[i] != 0xff){
@@ -261,15 +287,39 @@ static int is_broadcast(uint8_t * frame){
 	return 1;
 }
 
+//Si la MAC coincide con FF:FF:FF:FC es una notificacion de nueva conexion
+static int is_connect(uint8_t * frame){
+	for(int i = 0; i < MAC_SIZE -1 ; i++){
+		if(frame[i] != 0xff){
+			return 0;
+		}
+	}
+	return frame[MAC_SIZE - 1] == 0xfc;
+}
+
+
+//Si la MAC coincide con FF:FF:FF:FD es una notifiacion de desconexion
+static int is_disconnect(uint8_t * frame){
+	for(int i = 0; i < MAC_SIZE -1 ; i++){
+		if(frame[i] != 0xff){
+			return 0;
+		}
+	}
+	return frame[MAC_SIZE - 1] == 0xfd;
+}
+
+
 
 static int checkMAC(uint8_t* frame){
-	if(is_broadcast(frame)){
+	if(is_broadcast(frame) || is_connect(frame) || is_disconnect(frame)){
 		return 1;
 	}
 
+	//Chequeo con mi MAC
 	for(int i = 0; i < MAC_SIZE ; i++){
-		if(frame[i] != myMAC[i])
+		if(frame[i] != myMAC[i]){
 			return 0;
+		}
 	}
 	return 1;
 }
@@ -362,6 +412,19 @@ void rtl_clear_msgs(){
 
 
 
+int rtl_get_active_users(int * vec){
+	int i;
+	int j = 0;
+
+	for(i = 0; i < MAX_USERS ; i++){
+		if(connected_users[i]){
+			vec[j++] = i;
+		}		
+	}
+
+	return j;
+}
+
 
 
 
@@ -419,6 +482,32 @@ void rtl_send(char * msg, int dst){
 
 
 
+
+void rtl_notify_connection(int connect){
+	uint32_t tsd = TSD0 + (currentDescriptor * 4);
+	uint32_t tsad = TSAD0 + (currentDescriptor * 4);
+	int i;
+
+	for(i=0; i < MAC_SIZE - 1; i++){
+		transmission.frame.hdr.dst[i] = '\xff';
+	}
+
+	am_i_connected = connect;
+
+	transmission.frame.hdr.dst[MAC_SIZE - 1] = connect ? 0xfc : 0xfd;
+	transmission.frame.hdr.proto = ETH_P_802_3; //Dummy type
+
+	uint32_t descriptor = ETH_HLEN; //Bits 0-12: Size
+	transmission.size = descriptor;	
+	descriptor &= ~(TSD_OWN); //Apago el bit 13 TSD_OWN
+	descriptor &= ~(0x3f << 16);	// 21-16 threshold en 0
+	
+	while (!(sysInLong(tsd) & TSD_OWN))
+		;
+
+	sysOutLong(tsd, descriptor);
+
+}
 
 
 
