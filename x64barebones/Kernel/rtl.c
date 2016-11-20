@@ -246,7 +246,7 @@ void rtlHandler(){
 		uint8_t * frame = receiveBuffer + RX_HEADER_SIZE;
 		if(checkMAC(frame))
 		{	
-			if(!is_connect(frame) && !is_disconnect(frame)){
+			if(!is_connect(frame) && !is_disconnect(frame) && am_i_connected){
 				int broadcasting = is_broadcast(frame);
 				rtl_save_msg(broadcasting, receiveBuffer);
 			}

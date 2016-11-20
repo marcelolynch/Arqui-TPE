@@ -18,6 +18,10 @@ static void getChatCommand();
 static char cmd_buffer[MAX_SIZE];
 
 static int connected_users[255];
+static int muted_users[255];
+static void printHelp();
+
+
 
 void chat(){
 	char buffer[1000];
@@ -26,11 +30,8 @@ void chat(){
 	sys_clear_msgs();
 	sys_connect();
 
-	printf("   Bienvenido a este humilde chat!\n");
-	printf("\t'r' para recibir nuevos mensajes \n");
-	printf("\t's <id> <tu mensaje>' para mandarle un mensaje al usuario <id>\n\t(el id debe ser un numero entre 0 y 255)\n");
-	printf("\t'b <tu mensaje>' para mandar un mensaje publico\n");
-	printf("\t'users' para ver los usuarios conectados\n");
+	printf("Bienvenido a HumbleChat!\n");
+	printHelp();
 	while(active){
 		putchar('\n');
 		putchar('>');
@@ -39,6 +40,18 @@ void chat(){
 	}
 
 	sys_disconnect();
+
+}
+
+
+static void printHelp(){
+	printf("\n\nLos comandos del chat son:\n");
+	printf("\t'users' para ver los usuarios conectados\n");
+	printf("\t'r' para recibir nuevos mensajes \n");
+	printf("\t's <id> <tu mensaje>' para mandarle un mensaje al usuario <id>\n\t\t(el id debe ser un numero entre 0 y 255)\n");
+	printf("\t'b <tu mensaje>' para mandar un mensaje publico\n");
+	printf("\t'clear' para limpiar la pantalls\n");	
+	printf("\t'help' para volver a mostrar esta ayuda\n");	
 
 }
 
@@ -78,7 +91,7 @@ static int processChatCommand(char * buf){
 	
 	else if(strcmp("clear", cmd_buffer) == 0){
 		sys_clrscrn();
-		printf("CHAT!\n \t 'r' para recibir nuevos mensajes \n\t 'send <tu mensaje>' para mandar un mensaje publico\n");
+		printf("HumbleChat 2.0 \n Escribi 'help' para mostrar los comandos \n");
 	}
 
 	else if(starts_with(cmd_buffer, "s ")){
@@ -120,7 +133,7 @@ static int processChatCommand(char * buf){
 		msg_desc msg_info;
 		int b;
 		if((b = sys_get_msg(buf, &msg_info, MAX_MSG_SIZE)) == -1){
-			printf("\nNo new messages :(\n");
+			printf("\nNo hay mensajes nuevos :(\n");
 		}else{
 			do{
 			printf("\n Nuevos mensajes:\n");
@@ -148,6 +161,11 @@ static int processChatCommand(char * buf){
 		}
 
 	}
+
+	else if(strcmp("help", cmd_buffer) == 0){
+		printHelp();
+	}
+
 	else{
 		printf("\nComando invalido\n");
 	}
