@@ -1,6 +1,7 @@
 //http://wiki.osdev.org/RTL8139
 #include <port.h>
 #include <rtl.h>
+#include <rtc.h>
 #include <stdint.h>
 #include <string.h>
 #include <naiveConsole.h>
@@ -39,6 +40,7 @@ void * _memalloc(uint64_t size);
 #define PROTO_SIZE 6
 #define MSG_BUF_SIZE 100
 #define MAX_MSG_SIZE 512
+#define DATE_SIZE 16
 
 #define MAX_USERS 0xff
 
@@ -91,8 +93,14 @@ typedef struct{
 		char user;
 		char data[MAX_MSG_SIZE + 1];
 	} msg;
+	struct{
+		char day;
+		char month;
+		char year;
+		char hour;
+		char min;
+	} time;
 } msg_slot;
-
 
 
 /*
@@ -345,6 +353,11 @@ static void rtl_save_msg(int is_broadcast, char * frame){
 	message_buffer[current].present = TRUE; //Ocupo el slot
 	message_buffer[current].msg.broadcast = is_broadcast;
 	message_buffer[current].msg.user = frame[USER_BYTE_OFFSET];
+	message_buffer[current].time.day = getDayOfMonth();
+	message_buffer[current].time.month = getMonth();
+	message_buffer[current].time.year = getYear();
+	message_buffer[current].time.hour = getHours();
+	message_buffer[current].time.min = getMinutes();
 
 	/*ncPrint("Saving msg: "); ncPrint(msg);
 	ncNewline();
@@ -368,6 +381,13 @@ static void rtl_save_msg(int is_broadcast, char * frame){
 typedef struct{
 	int broadcast;
 	int user;
+	struct{
+		char day;
+		char month;
+		char year;
+		char hour;
+		char min;
+	} time;
 } msg_info;
 
 int rtl_next_msg(char* buf, void * info, int max_size){
@@ -386,6 +406,11 @@ int rtl_next_msg(char* buf, void * info, int max_size){
 
 	((msg_info*)info)->broadcast = message_buffer[pointer].msg.broadcast;
 	((msg_info*)info)->user = message_buffer[pointer].msg.user;
+	((msg_info*)info)->time.day = message_buffer[pointer].time.day;
+	((msg_info*)info)->time.month = message_buffer[pointer].time.month;
+	((msg_info*)info)->time.year = message_buffer[pointer].time.year;
+	((msg_info*)info)->time.hour = message_buffer[pointer].time.hour;
+	((msg_info*)info)->time.min = message_buffer[pointer].time.min;
 
 	pointer++;						//Avanzo en el buffer
 	pointer = pointer%MSG_BUF_SIZE;
@@ -508,7 +533,6 @@ void rtl_notify_connection(int connect){
 	sysOutLong(tsd, descriptor);
 
 }
-
 
 
 //LO QUE SIGUE ES PARA DEBUG

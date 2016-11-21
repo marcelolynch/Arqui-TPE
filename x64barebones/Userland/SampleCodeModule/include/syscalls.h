@@ -6,6 +6,13 @@
 typedef struct{
 	int is_broadcast;
 	int user;
+	struct{
+		char day;
+		char month;
+		char year;
+		char hour;
+		char min;
+	} time;
 } msg_desc;
 
 

@@ -132,6 +132,7 @@ static int processChatCommand(char * buf){
 		}else{
 			do{
 			printf("\n Nuevos mensajes:\n");
+			printf("[%d/%d/%d-%d%s%d]\n", msg_info.time.day, msg_info.time.month, msg_info.time.year, msg_info.time.hour, ((msg_info.time.min < 10)? ":0" : ":"),msg_info.time.min);
 			printf("[Mensaje %s del usuario #%d]  %s \n", 
 						msg_info.is_broadcast ? "publico" : "privado", 
 						msg_info.user, 
