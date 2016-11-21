@@ -73,15 +73,32 @@ static void processCommand(){
 	}
 	else if(strcmp("clear", cmd_buffer) == 0){
 		sys_clrscrn();
-	} else if(strcmp("f", cmd_buffer) == 0){
+	}
+	else if(strcmp("help", cmd_buffer) == 0){
+		help();
+	}
+	else if(strcmp("fanorona", cmd_buffer) == 0){
+		sys_clrscrn();
 		fanorona();
-	}else if(strcmp(cmd_buffer, "chat") == 0){
+		sys_clrscrn();
+	}
+	else if(strcmp(cmd_buffer, "chat") == 0){
 		chat();
+		sys_clrscrn();
 	}
 	else if(strcmp("exit", cmd_buffer) == 0){
 		run = 0;
 	}
-	else{
-		printf("\nInvalid command \n");
+	else if(strcmp("2048", cmd_buffer) == 0){
+		sys_clrscrn();
+		dosMilCuarentaYOcho();
+		sys_clrscrn();
+	}
+	else if(strcmp("ran", cmd_buffer) == 0){
+		printf("\n %d \n ",rand());
+	}
+	else
+	{
+		printf("\nComando invalido, escriba 'help' para ver los comandos disponibles\n");
 	}
 }

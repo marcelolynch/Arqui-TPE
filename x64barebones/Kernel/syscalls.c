@@ -18,6 +18,7 @@ uint64_t _clear_msgs(uint64_t dummy1, uint64_t dummy2, uint64_t dummy3);
 uint64_t _connect(uint64_t dummy1, uint64_t dummy2, uint64_t dummy3);
 uint64_t _disconnect(uint64_t dummy1, uint64_t dummy2, uint64_t dummy3);
 uint64_t _get_active_users(uint64_t vec, uint64_t dummy1, uint64_t dummy2);
+uint64_t _get_ticks(uint64_t dummy, uint64_t dummy2, uint64_t dummy3);
 
 
 syscall_ptr sysCalls[] = {
@@ -32,7 +33,8 @@ syscall_ptr sysCalls[] = {
 	_clear_msgs,  //syscall 10
 	_connect,	//syscall 11
 	_disconnect, //syscall 12
-	_get_active_users //syscall 13
+	_get_active_users, //syscall 13
+	_get_ticks // syscall 14
 };
 
 
@@ -68,7 +70,9 @@ uint64_t _memalloc(uint64_t size, uint64_t dummy2, uint64_t dummy3){
 	return (uint64_t)ptr;
 }
 
-
+uint64_t _get_ticks(uint64_t dummy, uint64_t dummy2, uint64_t dummy3){
+	return getTicks();
+}
 
 
 uint64_t _get_msg(uint64_t buf, uint64_t msg_info, uint64_t max_size){

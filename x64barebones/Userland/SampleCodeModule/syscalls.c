@@ -12,7 +12,7 @@
 #define SYS_CONNECT 11
 #define SYS_DISCONNECT 12
 #define SYS_GET_ACTIVE_USERS 13
-
+#define SYS_GETTICKS 14
 
 uint64_t _syscall(uint64_t code, uint64_t param1, uint64_t param2, uint64_t param3);
 
@@ -74,3 +74,6 @@ uint64_t sys_get_active_users(int * vec){
 	return _syscall(SYS_GET_ACTIVE_USERS, (uint64_t)vec, 0, 0);
 }
 
+uint64_t sys_getAmountOfTicks(){
+	return _syscall(SYS_GETTICKS, 0, 0, 0);
+}

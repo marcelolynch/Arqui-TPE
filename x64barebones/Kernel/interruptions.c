@@ -1,6 +1,7 @@
 //interruptions.c
 #include <interruptions.h>
 #include <keyboard_driver.h>
+#include <tick.h>
 
 #pragma pack(push)
 #pragma pack(1)
@@ -32,12 +33,6 @@ void iSetHandler(int index, uint64_t handler) {
 	IDT[index].zero_h = 0;
 
 }
-
-
-
-void tickHandler() {
-}
-
 
 static int count = 0;
 void ncPrint(char*s);
