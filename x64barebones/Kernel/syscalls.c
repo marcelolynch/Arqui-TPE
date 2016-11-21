@@ -2,8 +2,10 @@
 #include "video_driver.h"
 #include "keyboard_driver.h"
 #include <rtl.h>
+#include <rtc.h>
 
 typedef uint64_t (* syscall_ptr)(uint64_t p, uint64_t q, uint64_t r);
+typedef uint64_t (* rtc_data)();
 
 
 uint64_t _write(uint64_t fd, uint64_t str, uint64_t size);
@@ -19,6 +21,7 @@ uint64_t _connect(uint64_t dummy1, uint64_t dummy2, uint64_t dummy3);
 uint64_t _disconnect(uint64_t dummy1, uint64_t dummy2, uint64_t dummy3);
 uint64_t _get_active_users(uint64_t vec, uint64_t dummy1, uint64_t dummy2);
 uint64_t _get_ticks(uint64_t dummy, uint64_t dummy2, uint64_t dummy3);
+uint64_t _get_rtc_data(uint64_t which, uint64_t dummy1, uint64_t dummy2);
 
 
 syscall_ptr sysCalls[] = {
@@ -34,9 +37,19 @@ syscall_ptr sysCalls[] = {
 	_connect,	//syscall 11
 	_disconnect, //syscall 12
 	_get_active_users, //syscall 13
-	_get_ticks // syscall 14
+	_get_ticks, // syscall 14
+	_get_rtc_data // syscall 15
 };
 
+rtc_data functions[] = {
+	getSeconds,
+	getMinutes,
+	getHours,
+	getWeekDay,
+	getDayOfMonth,
+	getMonth,
+	getYear
+};
 
 
 
@@ -108,4 +121,10 @@ uint64_t _disconnect(uint64_t dummy1, uint64_t dummy2, uint64_t dummy3){
 
 uint64_t _get_active_users(uint64_t vec, uint64_t dummy1, uint64_t dummy2){
 	return rtl_get_active_users((int*)vec);
+}
+
+
+
+uint64_t _get_rtc_data(uint64_t which, uint64_t dummy1, uint64_t dummy2){
+	return functions[which]();
 }

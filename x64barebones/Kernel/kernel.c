@@ -6,6 +6,7 @@
 #include <interruptions.h>
 #include <pci.h>
 #include <rtl.h>
+#include <rtc.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -94,6 +95,7 @@ void * initializeKernelBinary()
 	dma_init();
 	findRTL();
 	rtl_init();
+	rtcInit();
 
 	rtlPrintMac();
 

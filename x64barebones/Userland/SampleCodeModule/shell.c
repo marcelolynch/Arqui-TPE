@@ -97,6 +97,10 @@ static void processCommand(){
 	else if(strcmp("ran", cmd_buffer) == 0){
 		printf("\n %d \n ",rand());
 	}
+	else if(strcmp("time", cmd_buffer) == 0){
+		printf("\n %d:%d:%d del %s ", getFromClock(2),getFromClock(1),getFromClock(0),convertDay(getFromClock(3)));
+		printf("%d de %s de %d \n", getFromClock(4), convertMonth(getFromClock(5)), 2000 + getFromClock(6));
+	}
 	else
 	{
 		printf("\nComando invalido, escriba 'help' para ver los comandos disponibles\n");

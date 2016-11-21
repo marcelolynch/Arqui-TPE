@@ -17,4 +17,7 @@ int atoi(char *str);
 
 void * myalloc(uint64_t size);
 
+char* convertDay(int i);
+
+char* convertMonth(int i);
 #endif
