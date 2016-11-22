@@ -25,8 +25,16 @@ void* realloc(void * ptr, uint64_t size){
 }
 
 unsigned int rand(void){
-	return sys_getAmountOfTicks() % RAND_MAX;
+	int rand = (sys_getAmountOfTicks() % 10 == 0)? 1 : (sys_getAmountOfTicks()% RAND_MAX) % 10;
+	rand *= (getFromClock(0) == 0)? 1 : getFromClock(0);
+	return rand;
 }
+/*
+unsigned int rand(void){
+	int rand = (sys_getAmountOfTicks() % 10 == 0)? 1 : (sys_getAmountOfTicks()% RAND_MAX) % 10;
+	rand *= (getFromClock(0) == 0)? 1 : getFromClock(0);
+	return rand;
+}*/
 
 int atoi(char *str){
 	int answer = 0;

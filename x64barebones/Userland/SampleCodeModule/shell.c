@@ -95,7 +95,7 @@ static void processCommand(){
 		sys_clrscrn();
 	}
 	else if(strcmp("ran", cmd_buffer) == 0){
-		printf("\n %d \n ",rand());
+		printf("\n%d\n",rand());
 	}
 	else if(strcmp("time", cmd_buffer) == 0){
 		printf("\n %d:%d:%d del %s ", getFromClock(2),getFromClock(1),getFromClock(0),convertDay(getFromClock(3)));
