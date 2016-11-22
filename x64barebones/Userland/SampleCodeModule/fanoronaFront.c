@@ -142,15 +142,14 @@ int fanorona(void){
 	printf("\t\t o APPROACH)\n\n");
 	printf("\t\t=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=\n\n");
 	printf("\tElija una opcion:\n\n");
-	printf("\t\t1. Juego nuevo: vs PC\n");
-	printf("\t\t2. Juego nuevo: dos jugadores\n");
-	printf("\t\t3. Salir\n\n");
+	printf("\t\t1. Juego nuevo\n");
+	printf("\t\t2. Salir\n\n");
 	do{
 		opcion=getint("Ingrese un numero de opcion > "); 
-	}while(opcion<1 || opcion>3);
+	}while(opcion<1 || opcion>2);
 
-	if(opcion == 1 || opcion == 2){
-		modo = opcion == 1 ? PVE : PVP; /* 1 es juego contra la computadora, 2 es dos jugadores*/	
+	if(opcion == 1){
+		modo = PVP; /* 1 es juego contra la computadora, 2 es dos jugadores*/	
 		pedirDimensiones(&filas, &columnas);
 		partida=generarPartida(filas,columnas, modo);
 	
@@ -299,7 +298,7 @@ int leerLinea(char str[], int dim){
 	int count = 0;
 	for (i=0; i<dim-1 && (c=getchar())!='\n'; i++){
 		if(c!='\b' || count > 0){
-		putchar(c);
+		    putchar(c);
 		if(c != '\b'){
 			count++;
 			str[i] = c;
@@ -562,17 +561,17 @@ void imprimirTablero (const tPartida partida){
 			{	if(i==-1)
 				{	if(j==0)
 						putchar('\t');
-					printf("%-4d",j+1);
+					printf("%d ",j+1);
 
 					if( j== numCols(partida) -1)
 						putchar('\n');
 				}
 				else
 				{	if ( consultarTipo(partida, i, j)==DEBIL)
-					   printf("%-4c", tolower( idColor[ consultarOcupante(partida,i,j) ] ));
+					   printf("  %c", tolower( idColor[ consultarOcupante(partida,i,j) ] ));
 										 /*BLANCO=0, NEGRO=1, VACIO=2*/
 					else 
-						printf("%-4c", idColor[ consultarOcupante(partida, i, j) ]);
+						printf("  %c", idColor[ consultarOcupante(partida, i, j) ]);
 				}
 			}
 		}

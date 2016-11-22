@@ -27,5 +27,8 @@ uint64_t sys_clear_msgs();
 uint64_t sys_connect();
 uint64_t sys_disconnect();
 uint64_t sys_get_active_users(int * vec);
+uint64_t sys_getAmountOfTicks();
+uint64_t sys_get_rtc_data(int i);
+uint64_t sys_get_network_id();
 
 #endif

@@ -22,6 +22,8 @@ uint64_t _disconnect(uint64_t dummy1, uint64_t dummy2, uint64_t dummy3);
 uint64_t _get_active_users(uint64_t vec, uint64_t dummy1, uint64_t dummy2);
 uint64_t _get_ticks(uint64_t dummy, uint64_t dummy2, uint64_t dummy3);
 uint64_t _get_rtc_data(uint64_t which, uint64_t dummy1, uint64_t dummy2);
+uint64_t _get_network_id(uint64_t dummy, uint64_t dummy1, uint64_t dummy2);
+
 
 
 syscall_ptr sysCalls[] = {
@@ -38,7 +40,8 @@ syscall_ptr sysCalls[] = {
 	_disconnect, //syscall 12
 	_get_active_users, //syscall 13
 	_get_ticks, // syscall 14
-	_get_rtc_data // syscall 15
+	_get_rtc_data, // syscall 15 
+	_get_network_id // syscall 16
 };
 
 rtc_data functions[] = {
@@ -124,7 +127,12 @@ uint64_t _get_active_users(uint64_t vec, uint64_t dummy1, uint64_t dummy2){
 }
 
 
+uint64_t _get_network_id(uint64_t dummy, uint64_t dummy1, uint64_t dummy2){
+	return rtl_get_id();
+}
+
 
 uint64_t _get_rtc_data(uint64_t which, uint64_t dummy1, uint64_t dummy2){
 	return functions[which]();
 }
+

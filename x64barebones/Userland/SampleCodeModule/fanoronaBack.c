@@ -501,7 +501,6 @@ tPartida generarPartida(int fils, int cols, int modo){
 	** nunca se sabe */
 	if( fils < MIN_DIM || fils > MAX_DIM || cols < MIN_DIM || cols > MAX_DIM
 		 || cols%2==0 || fils%2 == 0 || cols<fils || (modo != PVE && modo != PVP)){
-					printf("\n ret null 1\n");
 
 		return NULL;
 }

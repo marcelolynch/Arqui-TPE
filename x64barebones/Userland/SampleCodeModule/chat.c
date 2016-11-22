@@ -18,7 +18,8 @@ static void getChatCommand();
 static char cmd_buffer[MAX_SIZE];
 
 static int connected_users[255];
-static int muted_users[255];
+static int myID;
+
 static void printHelp();
 
 
@@ -29,7 +30,7 @@ void chat(){
 	sys_clrscrn();
 	sys_clear_msgs();
 	sys_connect();
-
+	myID = sys_get_network_id();
 	printf("Bienvenido a HumbleChat!\n");
 	printHelp();
 	while(active){
@@ -46,6 +47,7 @@ void chat(){
 
 
 static void printHelp(){
+	printf("Su numero de usuario es #%d\n", myID);
 	printf("\n\nLos comandos del chat son:\n");
 	printf("\t'users' para ver los usuarios conectados\n");
 	printf("\t'r' para recibir nuevos mensajes \n");
@@ -96,7 +98,10 @@ static int processChatCommand(char * buf){
 		if(decode_send(&user, &digits_offset)){
 			if(user > 0xFF){
 				printf("No existe ese usuario (los usuarios van de 0 a 255)\n");
-			}else{
+			}else if(user == myID){
+				printf("No puede enviarse un mensaje a usted mismo\n");
+			}
+			else{
 				int i;
 				int active = 0; 
 				int count = sys_get_active_users(connected_users);
@@ -148,9 +153,13 @@ static int processChatCommand(char * buf){
 	
 	} 
 	else if(strcmp("users", cmd_buffer) == 0){
-		printf("\nUsuarios conectados: \n");
 		int i;
 		int count = sys_get_active_users(connected_users);
+		if(count > 0){
+			printf("\nUsuarios conectados: \n");
+		}else{
+			printf("\nNo hay usuarios conectados\n");
+		}
 		for(i = 0; i < count; i++){
 			printf("Usuario #%d\n", connected_users[i]);
 		}

@@ -451,6 +451,9 @@ int rtl_get_active_users(int * vec){
 }
 
 
+int rtl_get_id(){
+	return myMAC[5];
+}
 
 
 /*

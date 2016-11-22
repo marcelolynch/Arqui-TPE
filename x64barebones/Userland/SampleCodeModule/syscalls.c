@@ -14,6 +14,7 @@
 #define SYS_GET_ACTIVE_USERS 13
 #define SYS_GETTICKS 14
 #define SYS_GETRTCDATA 15
+#define SYS_GET_NETWORK_ID 16
 
 uint64_t _syscall(uint64_t code, uint64_t param1, uint64_t param2, uint64_t param3);
 
@@ -81,4 +82,9 @@ uint64_t sys_getAmountOfTicks(){
 
 uint64_t sys_get_rtc_data(int i){
 	return _syscall(SYS_GETRTCDATA, i, 0, 0);
+}
+
+
+uint64_t sys_get_network_id(){
+	return _syscall(SYS_GET_NETWORK_ID,0,0,0);
 }
