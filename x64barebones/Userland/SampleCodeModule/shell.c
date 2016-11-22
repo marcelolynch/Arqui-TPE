@@ -34,7 +34,7 @@ void shell(){
 
 	run = 1;
 	while(run){
-		putchar('>');
+		printf("$>");
 		getCommand();
 		processCommand();
 	}
